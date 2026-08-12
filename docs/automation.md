@@ -13,9 +13,11 @@ S1Lua is designed so an S1API stable release produces one review task, not a man
 
 If an S1API UID disappeared, the sync job fails before opening a misleading compatibility PR. That is the intended maintenance signal: update the one handwritten beginner adapter and its surface anchor, then rerun the workflow.
 
+Public runners generate the UID catalog from the published S1API Mono release assembly before running the S1Lua generator. This keeps compatibility validation tied to the shipped API without requiring private game assemblies or committing S1API's generated DocFX output.
+
 ## Required S1Lua repository secrets
 
-Add these before the first push to `main`:
+Add these before enabling private runtime CI and release automation:
 
 | Secret | Purpose |
 | --- | --- |
@@ -35,10 +37,10 @@ The package gate also verifies the runtime-specific MoonSharp asset: `net40-clie
 
 ## Recommended repository settings
 
-Protect `main`, require PRs, and require these checks:
+Protect `main` and require PRs. Require `Generated surface and tests` immediately; once private runtime CI is enabled, also require `Mono and IL2CPP release build`.
 
-- `Generated surface and tests`;
-- `Mono and IL2CPP release build`.
+- `Generated surface and tests`
+- `Mono and IL2CPP release build` (after `PRIVATE_RUNTIME_CI_ENABLED` is enabled)
 
 Allow the automation token to create branches and PRs, but do not grant it bypass rights. The generated compatibility PR should pass the same review and branch protection as a human PR.
 

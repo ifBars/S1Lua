@@ -46,8 +46,8 @@ public static class Program
             foreach (GeneratedArtifact artifact in artifacts)
             {
                 string path = Path.Combine(options.RepositoryRoot, artifact.RelativePath.Replace('/', Path.DirectorySeparatorChar));
-                string normalized = NormalizeNewlines(artifact.Content);
-                string? existing = File.Exists(path) ? NormalizeNewlines(File.ReadAllText(path)) : null;
+                string normalized = NormalizeGeneratedText(artifact.Content);
+                string? existing = File.Exists(path) ? NormalizeLineEndings(File.ReadAllText(path)) : null;
                 if (string.Equals(existing, normalized, StringComparison.Ordinal))
                     continue;
 
@@ -139,7 +139,10 @@ public static class Program
         return args[index];
     }
 
-    private static string NormalizeNewlines(string text) =>
+    private static string NormalizeGeneratedText(string text) =>
+        NormalizeLineEndings(text).TrimEnd('\n') + "\n";
+
+    private static string NormalizeLineEndings(string text) =>
         text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
 
     private static void PrintUsage()
