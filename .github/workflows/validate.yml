@@ -45,6 +45,18 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
+      - name: Restore documentation tools
+        shell: pwsh
+        working-directory: S1Lua
+        run: dotnet tool restore
+
+      - name: Prepare S1API UID metadata
+        shell: pwsh
+        working-directory: S1Lua
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/Prepare-S1ApiMetadata.ps1 -Version '${{ steps.versions.outputs.s1api }}'
+
       - name: Validate generated surface and tests
         shell: pwsh
         working-directory: S1Lua
@@ -52,7 +64,7 @@ jobs:
 
   full-runtime:
     name: Mono and IL2CPP release build
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ vars.PRIVATE_RUNTIME_CI_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: windows-latest
 
     steps:

@@ -29,6 +29,7 @@ jobs:
         working-directory: S1Lua
         run: |
           $surface = Get-Content -LiteralPath surface/s1lua.surface.json -Raw | ConvertFrom-Json
+          "s1api=$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
           "ref=v$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
 
       - name: Check out anchored S1API source
@@ -46,6 +47,13 @@ jobs:
       - name: Restore documentation tools
         working-directory: S1Lua
         run: dotnet tool restore
+
+      - name: Prepare S1API UID metadata
+        shell: pwsh
+        working-directory: S1Lua
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/Prepare-S1ApiMetadata.ps1 -Version '${{ steps.versions.outputs.s1api }}'
 
       - name: Verify generated Lua reference
         shell: pwsh
