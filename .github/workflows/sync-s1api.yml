@@ -89,6 +89,20 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
+      - name: Restore documentation tools
+        if: steps.upstream.outputs.needs_update == 'true'
+        shell: pwsh
+        working-directory: S1Lua
+        run: dotnet tool restore
+
+      - name: Prepare S1API UID metadata
+        if: steps.upstream.outputs.needs_update == 'true'
+        shell: pwsh
+        working-directory: S1Lua
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/Prepare-S1ApiMetadata.ps1 -Version '${{ steps.upstream.outputs.version }}'
+
       - name: Update and validate compatibility surface
         if: steps.upstream.outputs.needs_update == 'true'
         shell: pwsh
