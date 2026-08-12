@@ -28,7 +28,7 @@ _layout: landing
       <h3>React to the world</h3>
       <p>Run Lua callbacks when saves load, time passes, sleep ends, weather changes, or the game saves.</p>
     </a>
-    <a class="s1lua-card" href="docs/reference.md#s1luanpcinfo">
+    <a class="s1lua-card" href="docs/reference.md#npcinfo">
       <span class="s1lua-card-number">03</span>
       <h3>Work with people</h3>
       <p>Read NPC state, show dialogue, send texts, adjust relationships, and listen for NPC or quest events.</p>

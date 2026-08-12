@@ -13,7 +13,7 @@ Creates the single mod declared by this script.
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `options` | `S1LuaModOptions` | yes | Mod identity and display information. |
+| `options` | `ModOptions` | yes | Mod identity and display information. |
 
 ```lua
 local mod = s1.mod { id = "alex.golden-cuke", name = "Golden Cuke" }
@@ -35,11 +35,11 @@ Writes a warning to the MelonLoader log.
 | --- | --- | --- | --- |
 | `message` | `string` | yes | Warning to write. |
 
-### `s1.time() -> S1LuaTimeInfo|nil`
+### `s1.time() -> TimeInfo|nil`
 
 Returns the current game-time snapshot, or nil outside a loaded game.
 
-### `s1.weather() -> S1LuaWeatherInfo|nil`
+### `s1.weather() -> WeatherInfo|nil`
 
 Returns current weather weights, or nil before weather is available.
 
@@ -49,7 +49,7 @@ Declares a beginner-friendly S1API item without exposing builders or Unity objec
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `options` | `S1LuaItemOptions` | yes | Item fields and optional shop placement. |
+| `options` | `ItemOptions` | yes | Item fields and optional shop placement. |
 
 ```lua
 mod:item { id = "golden_cuke", clone = "cuke", name = "Golden Cuke", price = 250, shops = "compatible" }
@@ -90,7 +90,7 @@ Stores a string, number, boolean, or nil in this save.
 
 Asks the game to save now and returns whether the request was accepted.
 
-### `mod:npc(id) -> S1LuaNpc`
+### `mod:npc(id) -> Npc`
 
 Creates a reload-safe proxy for an existing NPC ID.
 
@@ -104,7 +104,7 @@ Declares a phone-map marker created after the game loads.
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `options` | `S1LuaMarkerOptions` | yes | Marker identity, target, and presentation. |
+| `options` | `MarkerOptions` | yes | Marker identity, target, and presentation. |
 
 ### `mod:call(options) -> boolean`
 
@@ -112,9 +112,9 @@ Queues a simple phone call and returns false when its NPC caller is unavailable.
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `options` | `S1LuaPhoneCallOptions` | yes | Caller and staged text. |
+| `options` | `PhoneCallOptions` | yes | Caller and staged text. |
 
-### `mod:quest(name) -> S1LuaQuest`
+### `mod:quest(name) -> Quest`
 
 Creates a read-only proxy for a known base-game quest title or compact ID.
 
@@ -122,7 +122,7 @@ Creates a read-only proxy for a known base-game quest title or compact ID.
 | --- | --- | --- | --- |
 | `name` | `string` | yes | Quest title such as Getting Started, or ID such as gettingstarted. |
 
-### `npc:info() -> S1LuaNpcInfo|nil`
+### `npc:info() -> NpcInfo|nil`
 
 Returns a primitive NPC snapshot, or nil while that NPC is unavailable.
 
@@ -164,7 +164,7 @@ Listens for relationship_changed, unlocked, or died and rebinds after loads.
 | `event` | `"relationship_changed"|"unlocked"|"died"` | yes | NPC event name. |
 | `callback` | `function` | yes | Callback; relationship_changed receives a number and unlocked receives type and notify. |
 
-### `quest:info() -> S1LuaQuestInfo|nil`
+### `quest:info() -> QuestInfo|nil`
 
 Returns a primitive quest snapshot, or nil before the quest is available.
 
@@ -195,7 +195,7 @@ Listens for completed or failed and rebinds after loads.
 
 ## Option tables
 
-### `S1LuaModOptions`
+### `ModOptions`
 
 Names and identifies one Lua mod.
 
@@ -207,7 +207,7 @@ Names and identifies one Lua mod.
 | `author` | `string` | no | - | Your name or handle. |
 | `description` | `string` | no | - | A short description of the mod. |
 
-### `S1LuaItemOptions`
+### `ItemOptions`
 
 Declares an item. S1Lua registers it at the safe S1API lifecycle stage.
 
@@ -225,7 +225,7 @@ Declares an item. S1Lua registers it at the safe S1API lifecycle stage.
 | `icon` | `string` | no | - | PNG path inside this mod folder. |
 | `shops` | `string|string[]` | no | - | Use compatible or a list of in-game shop names. |
 
-### `S1LuaPosition`
+### `Position`
 
 A fixed position in the game world.
 
@@ -235,7 +235,7 @@ A fixed position in the game world.
 | `y` | `number` | yes | - | World Y coordinate. |
 | `z` | `number` | yes | - | World Z coordinate. |
 
-### `S1LuaMarkerOptions`
+### `MarkerOptions`
 
 Declares a phone-map marker at a position or following an NPC.
 
@@ -243,13 +243,13 @@ Declares a phone-map marker at a position or following an NPC.
 | --- | --- | --- | --- | --- |
 | `id` | `string` | yes | - | Local marker ID. S1Lua prefixes it with the mod ID. |
 | `label` | `string` | no | - | Text shown beside the marker. |
-| `position` | `S1LuaPosition` | no | - | Fixed world position. Use this or npc, not both. |
+| `position` | `Position` | no | - | Fixed world position. Use this or npc, not both. |
 | `npc` | `string` | no | - | NPC ID for a marker that follows that NPC. Use this or position, not both. |
 | `icon` | `string` | no | - | PNG path inside this mod folder. |
 | `text` | `"always"|"hover"|"off"` | no | always | When the marker label is shown. |
 | `visible` | `boolean` | no | true | Whether the marker starts visible. |
 
-### `S1LuaPhoneCallOptions`
+### `PhoneCallOptions`
 
 Queues a simple staged phone call.
 
@@ -260,7 +260,7 @@ Queues a simple staged phone call.
 | `icon` | `string` | no | - | PNG caller portrait used when npc is not supplied. |
 | `stages` | `string[]` | yes | - | One to twenty lines shown in order. |
 
-### `S1LuaNpcInfo`
+### `NpcInfo`
 
 A primitive snapshot of an NPC. It contains no Unity or CLR objects.
 
@@ -273,7 +273,7 @@ A primitive snapshot of an NPC. It contains no Unity or CLR objects.
 | `is_unlocked` | `boolean` | yes | - | Whether the NPC is unlocked. |
 | `is_dead` | `boolean` | yes | - | Whether the NPC is dead. |
 
-### `S1LuaTimeInfo`
+### `TimeInfo`
 
 A primitive snapshot of the current game time.
 
@@ -286,7 +286,7 @@ A primitive snapshot of the current game time.
 | `is_night` | `boolean` | yes | - | Whether it is currently nighttime. |
 | `is_sleeping` | `boolean` | yes | - | Whether sleep is in progress. |
 
-### `S1LuaWeatherInfo`
+### `WeatherInfo`
 
 A primitive snapshot of the current weather weights.
 
@@ -303,7 +303,7 @@ A primitive snapshot of the current weather weights.
 | `hail` | `number` | yes | - | Hail weight from 0 to 1. |
 | `sleet` | `number` | yes | - | Sleet weight from 0 to 1. |
 
-### `S1LuaQuestInfo`
+### `QuestInfo`
 
 A primitive snapshot of a known base-game quest.
 

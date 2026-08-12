@@ -78,6 +78,37 @@ public sealed class SurfaceGeneratorTests
         Assert.All(artifacts, artifact => Assert.Contains("1.2.3", artifact.Content, StringComparison.Ordinal));
         GeneratedArtifact luaStub = Assert.Single(artifacts, artifact => artifact.RelativePath == "generated/s1lua.lua");
         Assert.Contains("---@param prefix? string", luaStub.Content, StringComparison.Ordinal);
+        Assert.Contains("---@class Api", luaStub.Content, StringComparison.Ordinal);
+        Assert.DoesNotContain("---@class S1Lua", luaStub.Content, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RejectsLuaTypesThatRepeatTheProductPrefix()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string api = Path.Combine(root, "api");
+            Directory.CreateDirectory(api);
+            var surface = new SurfaceDefinition
+            {
+                SchemaVersion = 1,
+                SurfaceVersion = "1.0.0",
+                S1ApiVersion = "1.0.0",
+                Types = new[]
+                {
+                    new SurfaceTypeDefinition { Name = "S1LuaModOptions", Summary = "Options." }
+                }
+            };
+
+            IReadOnlyList<string> errors = new SurfaceGenerator().Validate(surface, api);
+
+            Assert.Contains(errors, error => error.Contains("must not repeat", StringComparison.Ordinal));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [Fact]

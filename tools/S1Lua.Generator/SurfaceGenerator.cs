@@ -74,6 +74,8 @@ public sealed class SurfaceGenerator
         {
             if (string.IsNullOrWhiteSpace(type.Name))
                 errors.Add("Every type needs a name.");
+            else if (type.Name.StartsWith("S1Lua", StringComparison.Ordinal))
+                errors.Add($"Lua type {type.Name} must not repeat the S1Lua product prefix.");
             AddDuplicates(type.Fields.Select(field => field.Name), $"field in {type.Name}", errors);
             foreach (FieldDefinition field in type.Fields)
                 ValidateField(field, $"{type.Name}.{field.Name}", errors);
@@ -272,16 +274,16 @@ public sealed class SurfaceGenerator
             builder.AppendLine();
         }
 
-        builder.AppendLine("---@class S1LuaMod");
+        builder.AppendLine("---@class Mod");
         builder.AppendLine("local mod = {}");
         builder.AppendLine();
-        builder.AppendLine("---@class S1LuaNpc");
+        builder.AppendLine("---@class Npc");
         builder.AppendLine("local npc = {}");
         builder.AppendLine();
-        builder.AppendLine("---@class S1LuaQuest");
+        builder.AppendLine("---@class Quest");
         builder.AppendLine("local quest = {}");
         builder.AppendLine();
-        builder.AppendLine("---@class S1LuaApi");
+        builder.AppendLine("---@class Api");
         builder.AppendLine("local s1 = {}");
         builder.AppendLine();
 

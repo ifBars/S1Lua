@@ -5,7 +5,7 @@
   "summary": "A deliberately small Lua surface for first-time Schedule I modders.",
   "types": [
     {
-      "name": "S1LuaModOptions",
+      "name": "ModOptions",
       "summary": "Names and identifies one Lua mod.",
       "fields": [
         {
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "name": "S1LuaItemOptions",
+      "name": "ItemOptions",
       "summary": "Declares an item. S1Lua registers it at the safe S1API lifecycle stage.",
       "fields": [
         {
@@ -114,7 +114,7 @@
       ]
     },
     {
-      "name": "S1LuaPosition",
+      "name": "Position",
       "summary": "A fixed position in the game world.",
       "fields": [
         {
@@ -138,7 +138,7 @@
       ]
     },
     {
-      "name": "S1LuaMarkerOptions",
+      "name": "MarkerOptions",
       "summary": "Declares a phone-map marker at a position or following an NPC.",
       "fields": [
         {
@@ -155,7 +155,7 @@
         },
         {
           "name": "position",
-          "type": "S1LuaPosition",
+          "type": "Position",
           "required": false,
           "description": "Fixed world position. Use this or npc, not both."
         },
@@ -188,7 +188,7 @@
       ]
     },
     {
-      "name": "S1LuaPhoneCallOptions",
+      "name": "PhoneCallOptions",
       "summary": "Queues a simple staged phone call.",
       "fields": [
         {
@@ -219,7 +219,7 @@
       ]
     },
     {
-      "name": "S1LuaNpcInfo",
+      "name": "NpcInfo",
       "summary": "A primitive snapshot of an NPC. It contains no Unity or CLR objects.",
       "fields": [
         {
@@ -261,7 +261,7 @@
       ]
     },
     {
-      "name": "S1LuaTimeInfo",
+      "name": "TimeInfo",
       "summary": "A primitive snapshot of the current game time.",
       "fields": [
         {
@@ -303,7 +303,7 @@
       ]
     },
     {
-      "name": "S1LuaWeatherInfo",
+      "name": "WeatherInfo",
       "summary": "A primitive snapshot of the current weather weights.",
       "fields": [
         {
@@ -369,7 +369,7 @@
       ]
     },
     {
-      "name": "S1LuaQuestInfo",
+      "name": "QuestInfo",
       "summary": "A primitive snapshot of a known base-game quest.",
       "fields": [
         {
@@ -397,12 +397,12 @@
       "parameters": [
         {
           "name": "options",
-          "type": "S1LuaModOptions",
+          "type": "ModOptions",
           "required": true,
           "description": "Mod identity and display information."
         }
       ],
-      "returns": "S1LuaMod",
+      "returns": "Mod",
       "examples": [
         "local mod = s1.mod { id = \u0022alex.golden-cuke\u0022, name = \u0022Golden Cuke\u0022 }"
       ]
@@ -441,9 +441,9 @@
       "path": "s1.time",
       "scope": "global",
       "handler": "GetTime",
-      "signature": "s1.time() -\u003E S1LuaTimeInfo|nil",
+      "signature": "s1.time() -\u003E TimeInfo|nil",
       "summary": "Returns the current game-time snapshot, or nil outside a loaded game.",
-      "returns": "S1LuaTimeInfo|nil",
+      "returns": "TimeInfo|nil",
       "s1ApiUids": [
         "S1API.GameTime.TimeManager.CurrentDay",
         "S1API.GameTime.TimeManager.ElapsedDays",
@@ -457,9 +457,9 @@
       "path": "s1.weather",
       "scope": "global",
       "handler": "GetWeather",
-      "signature": "s1.weather() -\u003E S1LuaWeatherInfo|nil",
+      "signature": "s1.weather() -\u003E WeatherInfo|nil",
       "summary": "Returns current weather weights, or nil before weather is available.",
-      "returns": "S1LuaWeatherInfo|nil",
+      "returns": "WeatherInfo|nil",
       "s1ApiUids": [
         "S1API.Weather.WeatherManager.Current"
       ]
@@ -473,7 +473,7 @@
       "parameters": [
         {
           "name": "options",
-          "type": "S1LuaItemOptions",
+          "type": "ItemOptions",
           "required": true,
           "description": "Item fields and optional shop placement."
         }
@@ -585,7 +585,7 @@
       "path": "mod.npc",
       "scope": "mod",
       "handler": "CreateNpcProxy",
-      "signature": "mod:npc(id) -\u003E S1LuaNpc",
+      "signature": "mod:npc(id) -\u003E Npc",
       "summary": "Creates a reload-safe proxy for an existing NPC ID.",
       "parameters": [
         {
@@ -595,7 +595,7 @@
           "description": "Stable NPC ID such as benji_coleman."
         }
       ],
-      "returns": "S1LuaNpc",
+      "returns": "Npc",
       "s1ApiUids": [
         "S1API.Entities.NPC.Get(System.String)"
       ]
@@ -609,7 +609,7 @@
       "parameters": [
         {
           "name": "options",
-          "type": "S1LuaMarkerOptions",
+          "type": "MarkerOptions",
           "required": true,
           "description": "Marker identity, target, and presentation."
         }
@@ -636,7 +636,7 @@
       "parameters": [
         {
           "name": "options",
-          "type": "S1LuaPhoneCallOptions",
+          "type": "PhoneCallOptions",
           "required": true,
           "description": "Caller and staged text."
         }
@@ -654,7 +654,7 @@
       "path": "mod.quest",
       "scope": "mod",
       "handler": "CreateQuestProxy",
-      "signature": "mod:quest(name) -\u003E S1LuaQuest",
+      "signature": "mod:quest(name) -\u003E Quest",
       "summary": "Creates a read-only proxy for a known base-game quest title or compact ID.",
       "parameters": [
         {
@@ -664,7 +664,7 @@
           "description": "Quest title such as Getting Started, or ID such as gettingstarted."
         }
       ],
-      "returns": "S1LuaQuest",
+      "returns": "Quest",
       "s1ApiUids": [
         "S1API.Quests.QuestManager.Get\u0060\u00601"
       ]
@@ -673,9 +673,9 @@
       "path": "npc.info",
       "scope": "npc",
       "handler": "GetNpcInfo",
-      "signature": "npc:info() -\u003E S1LuaNpcInfo|nil",
+      "signature": "npc:info() -\u003E NpcInfo|nil",
       "summary": "Returns a primitive NPC snapshot, or nil while that NPC is unavailable.",
-      "returns": "S1LuaNpcInfo|nil",
+      "returns": "NpcInfo|nil",
       "s1ApiUids": [
         "S1API.Entities.NPC.Get(System.String)",
         "S1API.Entities.NPC.FullName",
@@ -796,9 +796,9 @@
       "path": "quest.info",
       "scope": "quest",
       "handler": "GetQuestInfo",
-      "signature": "quest:info() -\u003E S1LuaQuestInfo|nil",
+      "signature": "quest:info() -\u003E QuestInfo|nil",
       "summary": "Returns a primitive quest snapshot, or nil before the quest is available.",
-      "returns": "S1LuaQuestInfo|nil",
+      "returns": "QuestInfo|nil",
       "s1ApiUids": [
         "S1API.Quests.QuestManager.Get\u0060\u00601",
         "S1API.Quests.QuestWrapper.Title"
