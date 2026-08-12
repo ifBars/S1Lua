@@ -124,7 +124,7 @@ jobs:
           git config user.name "s1lua-automation"
           git config user.email "actions@users.noreply.github.com"
           git switch -c $branch
-          git add version.txt surface/s1lua.surface.json generated docs/reference.md src/S1Lua.Core/Generated
+          git add version.txt surface/s1lua.surface.json generated docs/api/reference.md src/S1Lua.Core/Generated
           git commit -m "chore: support S1API $env:S1API_VERSION"
           git push origin $branch
 

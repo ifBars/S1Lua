@@ -1,0 +1,12 @@
+- name: Start here
+  items:
+    - name: Installation
+      href: installation.md
+    - name: Quickstart
+      href: getting-started.md
+- name: Help and safety
+  items:
+    - name: Troubleshooting
+      href: troubleshooting.md
+    - name: Security boundaries
+      href: security.md

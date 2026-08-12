@@ -119,7 +119,7 @@ public sealed class SurfaceGenerator
         {
             new GeneratedArtifact("src/S1Lua.Core/Generated/GeneratedSurface.g.cs", GenerateCSharp(surface)),
             new GeneratedArtifact("generated/s1lua.lua", GenerateLuaStub(surface)),
-            new GeneratedArtifact("docs/reference.md", GenerateReference(surface)),
+            new GeneratedArtifact("docs/api/reference.md", GenerateReference(surface)),
             new GeneratedArtifact("generated/surface.snapshot.json", GenerateSnapshot(surface))
         };
     }

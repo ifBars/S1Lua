@@ -1,9 +1,0 @@
-- name: Home
-  href: index.md
-- name: Guides
-  href: docs/
-  homepage: docs/getting-started.md
-- name: Lua API
-  href: docs/reference.md
-- name: GitHub
-  href: https://github.com/ifBars/S1Lua

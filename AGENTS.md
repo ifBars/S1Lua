@@ -17,8 +17,9 @@ S1Lua is a beginner-facing Lua scripting layer over S1API. The public Lua surfac
 dotnet test tests/S1Lua.Tests/S1Lua.Tests.csproj -c Release
 dotnet build src/S1Lua.Runtime/S1Lua.Runtime.csproj -c MonoMelon -p:AutomateLocalDeployment=false
 dotnet build src/S1Lua.Runtime/S1Lua.Runtime.csproj -c Il2CppMelon -p:AutomateLocalDeployment=false
-./scripts/Package.ps1 -Configuration MonoMelon
-./scripts/Package.ps1 -Configuration Il2CppMelon
+./scripts/Package.ps1 -Runtime MonoMelon
+./scripts/Package.ps1 -Runtime Il2CppMelon
+dotnet docfx docs/docfx.json --warningsAsErrors
 ```
 
 ## Safety and compatibility

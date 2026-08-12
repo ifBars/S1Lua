@@ -35,7 +35,7 @@ try {
         } "DocFX tool restore failed."
 
         Invoke-Checked {
-            dotnet docfx docfx.json --warningsAsErrors
+            dotnet docfx docs/docfx.json --warningsAsErrors
         } "S1Lua documentation build failed."
     }
 

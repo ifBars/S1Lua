@@ -73,7 +73,7 @@ public sealed class SurfaceGeneratorTests
         Assert.Equal(4, artifacts.Count);
         Assert.Contains(artifacts, artifact => artifact.RelativePath.EndsWith("GeneratedSurface.g.cs", StringComparison.Ordinal));
         Assert.Contains(artifacts, artifact => artifact.RelativePath == "generated/s1lua.lua");
-        Assert.Contains(artifacts, artifact => artifact.RelativePath == "docs/reference.md");
+        Assert.Contains(artifacts, artifact => artifact.RelativePath == "docs/api/reference.md");
         Assert.Contains(artifacts, artifact => artifact.RelativePath == "generated/surface.snapshot.json");
         Assert.All(artifacts, artifact => Assert.Contains("1.2.3", artifact.Content, StringComparison.Ordinal));
         GeneratedArtifact luaStub = Assert.Single(artifacts, artifact => artifact.RelativePath == "generated/s1lua.lua");

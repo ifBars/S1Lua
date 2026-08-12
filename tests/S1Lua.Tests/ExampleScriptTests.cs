@@ -5,7 +5,7 @@ namespace S1Lua.Tests;
 public sealed class ExampleScriptTests
 {
     [Theory]
-    [InlineData("templates/MyFirstMod/mod.lua")]
+    [InlineData("examples/MyFirstMod/mod.lua")]
     [InlineData("examples/GoldenCuke/mod.lua")]
     public void ShippedBeginnerScriptsLoadAndDispatch(string relativePath)
     {

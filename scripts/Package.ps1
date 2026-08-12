@@ -75,7 +75,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $outputDirectory "S1Lua.dll") -Destination (Join-Path $modsDirectory "S1Lua.dll")
     Copy-Item -LiteralPath (Join-Path $outputDirectory "S1Lua.Core.dll") -Destination (Join-Path $userLibsDirectory "S1Lua.Core.dll")
     Copy-Item -LiteralPath (Join-Path $outputDirectory "MoonSharp.Interpreter.dll") -Destination (Join-Path $userLibsDirectory "MoonSharp.Interpreter.dll")
-    Copy-Item -LiteralPath "templates/MyFirstMod/mod.lua" -Destination (Join-Path $starterDirectory "mod.lua.example")
+    Copy-Item -LiteralPath "examples/MyFirstMod/mod.lua" -Destination (Join-Path $starterDirectory "mod.lua.example")
     Copy-Item -LiteralPath "generated/s1lua.lua" -Destination (Join-Path $editorDirectory "s1lua.lua")
     Copy-Item -LiteralPath "packaging/INSTALL.txt" -Destination (Join-Path $packageRoot "INSTALL.txt")
     Copy-Item -LiteralPath "LICENSE" -Destination (Join-Path $licensesDirectory "S1Lua.LICENSE.txt")

@@ -62,7 +62,7 @@ jobs:
 
       - name: Build documentation
         working-directory: S1Lua
-        run: dotnet docfx docfx.json --warningsAsErrors
+        run: dotnet docfx docs/docfx.json --warningsAsErrors
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
@@ -70,7 +70,7 @@ jobs:
       - name: Upload documentation site
         uses: actions/upload-pages-artifact@v5
         with:
-          path: S1Lua/_site
+          path: S1Lua/docs/_site
 
   deploy:
     name: Deploy documentation

@@ -27,7 +27,7 @@ Run the generator after changing the surface. Do not hand-edit these files:
 
 - `src/S1Lua.Core/Generated/GeneratedSurface.g.cs`;
 - `generated/s1lua.lua`;
-- `docs/reference.md`;
+- `docs/api/reference.md`;
 - `generated/surface.snapshot.json`.
 
 ## Surface design test

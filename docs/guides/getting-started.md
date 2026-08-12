@@ -1,12 +1,8 @@
-# Getting started
+# Quickstart
 
 Your first S1Lua mod is one folder containing one file. You do not need Visual Studio, a compiler, or a Unity project.
 
-## Before you begin
-
-Install the S1Lua release that matches your S1API runtime: Mono with Mono, or IL2CPP with IL2CPP. Start the game once and confirm the MelonLoader console contains an S1Lua line.
-
-If S1Lua reports that no Lua mods were found, the installation is working; it is waiting for your first script.
+Before continuing, [install S1Lua](installation.md) and start the game once. If the MelonLoader console reports that no Lua mods were found, the installation is working and waiting for your first script.
 
 ## 1. Create the folder
 
@@ -84,20 +80,10 @@ shops = { "Gas-Mart", "Hardware Store" }
 
 If an in-game shop name is wrong, S1Lua logs the registration error without stopping other Lua mods.
 
-## Read errors
-
-Start at the first S1Lua error in the MelonLoader console. Common messages explain the correction directly:
-
-- `call s1.mod first` means a `mod:` line appeared before the mod declaration;
-- `unknown event` means the event is not in the generated reference;
-- `clone source was not found` means the base-game item ID is wrong;
-- `ran for more than 1 second` usually means a loop never ends;
-- `icon path must stay inside` means the path points outside this mod folder.
-
-One script failing does not prevent sibling scripts from loading, and one event callback failing does not disable callbacks from other mods.
+If the mod does not load, start with [Troubleshooting](troubleshooting.md).
 
 ## Editor autocomplete (optional)
 
 The release archive includes `Editor/s1lua.lua`. Configure Lua Language Server to use that file as a library to get descriptions and completion for every supported S1Lua field. Repository contributors can open this repo directly; the [repository's `.luarc.json`](https://github.com/ifBars/S1Lua/blob/main/.luarc.json) already points at the generated stub.
 
-Continue with the generated [S1Lua reference](reference.md) when you want to see every available option.
+Continue with the generated [Lua API reference](../api/reference.md) when you want to see every available option.

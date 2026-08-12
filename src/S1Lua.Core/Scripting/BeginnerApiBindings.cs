@@ -135,7 +135,7 @@ internal sealed class BeginnerApiBindings
         int offset = LuaArguments.ModOffset(args);
         string eventName = LuaArguments.RequiredString(args, offset, "mod:on(event, callback)").ToLowerInvariant();
         if (!GeneratedSurface.IsKnownEvent(eventName))
-            throw new ScriptRuntimeException($"mod:on: unknown event '{eventName}'. See docs/reference.md for supported events.");
+            throw new ScriptRuntimeException($"mod:on: unknown event '{eventName}'. See the Lua API reference for supported events.");
 
         DynValue callback = LuaArguments.At(args, offset + 1, "mod:on(event, callback)");
         if (callback.Type is not (DataType.Function or DataType.ClrFunction))

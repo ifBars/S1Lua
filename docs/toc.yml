@@ -1,18 +1,10 @@
-- name: Start here
-  items:
-    - name: S1Lua overview
-      href: ../index.md
-    - name: Getting started
-      href: getting-started.md
-- name: Reference
-  items:
-    - name: Lua API
-      href: reference.md
-- name: Project
-  items:
-    - name: Security boundaries
-      href: security.md
-    - name: CI and releases
-      href: automation.md
-    - name: Maintaining the surface
-      href: maintaining.md
+- name: Home
+  href: index.md
+- name: Guides
+  href: guides/
+  homepage: guides/installation.md
+- name: Lua API
+  href: api/
+  homepage: api/reference.md
+- name: GitHub
+  href: https://github.com/ifBars/S1Lua

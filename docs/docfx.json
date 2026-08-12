@@ -5,8 +5,26 @@
       {
         "files": [
           "index.md",
+          "toc.yml"
+        ]
+      },
+      {
+        "src": "guides",
+        "dest": "guides",
+        "files": [
           "toc.yml",
-          "docs/**/*.{md,yml}"
+          "installation.md",
+          "getting-started.md",
+          "troubleshooting.md",
+          "security.md"
+        ]
+      },
+      {
+        "src": "api",
+        "dest": "api",
+        "files": [
+          "toc.yml",
+          "reference.md"
         ]
       }
     ],
