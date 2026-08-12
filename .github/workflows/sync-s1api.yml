@@ -1,0 +1,134 @@
+name: sync S1API
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  repository_dispatch:
+    types: [s1api_released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable S1API version, without the v prefix; blank uses the latest release
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-s1api
+  cancel-in-progress: false
+
+jobs:
+  compatibility-pr:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out S1Lua
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.S1LUA_AUTOMATION_TOKEN || github.token }}
+          path: S1Lua
+          fetch-depth: 0
+
+      - name: Resolve stable S1API release
+        id: upstream
+        shell: pwsh
+        working-directory: S1Lua
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          $version = $env:DISPATCH_VERSION
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = $env:INPUT_VERSION
+          }
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = gh api repos/ifBars/S1API/releases `
+              --jq '[.[] | select(.draft == false and .prerelease == false)][0].tag_name'
+          }
+          $version = $version.Trim().TrimStart('v')
+          if ($version -notmatch '^[0-9]+\.[0-9]+\.[0-9]+$') {
+            throw "Resolved S1API version '$version' is not a stable semantic version."
+          }
+
+          $surface = Get-Content -LiteralPath surface/s1lua.surface.json -Raw | ConvertFrom-Json
+          $current = [string] $surface.s1ApiVersion
+          $existingPr = gh pr list `
+            --repo $env:GITHUB_REPOSITORY `
+            --state all `
+            --search "S1API $version in:title" `
+            --json number `
+            --jq '.[0].number'
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "ref=v$version" >> $env:GITHUB_OUTPUT
+          "current=$current" >> $env:GITHUB_OUTPUT
+          "needs_update=$($current -ne $version -and [string]::IsNullOrWhiteSpace($existingPr))".ToLowerInvariant() >> $env:GITHUB_OUTPUT
+
+          if ($current -eq $version) {
+            Write-Host "S1Lua already targets S1API $version."
+          }
+          elseif (-not [string]::IsNullOrWhiteSpace($existingPr)) {
+            Write-Host "A compatibility PR for S1API $version already exists or was previously reviewed: #$existingPr."
+          }
+
+      - name: Check out new S1API source
+        if: steps.upstream.outputs.needs_update == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ifBars/S1API
+          ref: ${{ steps.upstream.outputs.ref }}
+          path: S1API
+
+      - name: Set up .NET
+        if: steps.upstream.outputs.needs_update == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Update and validate compatibility surface
+        if: steps.upstream.outputs.needs_update == 'true'
+        shell: pwsh
+        working-directory: S1Lua
+        run: |
+          ./scripts/Update-S1Api.ps1 -Version '${{ steps.upstream.outputs.version }}'
+          ./scripts/Validate.ps1 -SkipRuntime
+
+      - name: Open review PR
+        if: steps.upstream.outputs.needs_update == 'true'
+        shell: pwsh
+        working-directory: S1Lua
+        env:
+          GH_TOKEN: ${{ secrets.S1LUA_AUTOMATION_TOKEN || github.token }}
+          S1API_VERSION: ${{ steps.upstream.outputs.version }}
+          PREVIOUS_S1API_VERSION: ${{ steps.upstream.outputs.current }}
+        run: |
+          $branch = "automation/s1api-$env:S1API_VERSION"
+          git config user.name "s1lua-automation"
+          git config user.email "actions@users.noreply.github.com"
+          git switch -c $branch
+          git add version.txt surface/s1lua.surface.json generated docs/reference.md src/S1Lua.Core/Generated
+          git commit -m "chore: support S1API $env:S1API_VERSION"
+          git push origin $branch
+
+          $body = @"
+          S1API released **$env:S1API_VERSION** (previously **$env:PREVIOUS_S1API_VERSION**).
+
+          This automated compatibility update:
+
+          - validates every S1Lua S1API UID against the tagged source;
+          - regenerates C# bindings, LuaLS metadata, reference docs, and the compatibility snapshot;
+          - bumps the S1Lua patch version;
+          - triggers the full Mono and IL2CPP release build on this PR.
+
+          Review the generated diff and CI results. Merging this PR is the release approval; the successful main-branch validation publishes the new S1Lua GitHub release automatically.
+          "@
+          gh pr create `
+            --repo $env:GITHUB_REPOSITORY `
+            --base main `
+            --head $branch `
+            --title "chore: support S1API $env:S1API_VERSION" `
+            --body $body

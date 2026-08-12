@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>S1Lua</AssemblyName>
+    <RootNamespace>S1Lua.Runtime</RootNamespace>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <S1LuaAutomateLocalDeployment Condition="'$(S1LuaAutomateLocalDeployment)' == ''">false</S1LuaAutomateLocalDeployment>
+    <S1ApiProjectPath Condition="'$(S1ApiProjectPath)' == '' and Exists('$(MSBuildProjectDirectory)\..\..\..\S1API\S1API\S1API.csproj')">$(MSBuildProjectDirectory)\..\..\..\S1API\S1API\S1API.csproj</S1ApiProjectPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'MonoMelon'">
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <DefineConstants>$(DefineConstants);MONOMELON</DefineConstants>
+    <S1ApiAssemblyPath Condition="'$(S1ApiAssemblyPath)' == ''">$(S1ApiMonoAssemblyPath)</S1ApiAssemblyPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Il2CppMelon'">
+    <TargetFramework>net6.0</TargetFramework>
+    <DefineConstants>$(DefineConstants);IL2CPPMELON</DefineConstants>
+    <S1ApiAssemblyPath Condition="'$(S1ApiAssemblyPath)' == ''">$(S1ApiIl2CppAssemblyPath)</S1ApiAssemblyPath>
+  </PropertyGroup>
+
+  <Target Name="ValidateRuntimeConfiguration" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(Configuration)' != 'MonoMelon' and '$(Configuration)' != 'Il2CppMelon'"
+           Text="S1Lua.Runtime must be built with -c MonoMelon or -c Il2CppMelon." />
+    <Error Condition="!Exists('$(S1ApiProjectPath)') and !Exists('$(S1ApiAssemblyPath)')"
+           Text="Set S1ApiProjectPath or the configuration-specific S1ApiMonoAssemblyPath/S1ApiIl2CppAssemblyPath in local.build.props." />
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\S1Lua.Core\S1Lua.Core.csproj" />
+    <ProjectReference Include="$(S1ApiProjectPath)"
+                      Condition="Exists('$(S1ApiProjectPath)')"
+                      AdditionalProperties="AutomateLocalDeployment=false" />
+    <Reference Include="S1API" Condition="!Exists('$(S1ApiProjectPath)') and Exists('$(S1ApiAssemblyPath)')">
+      <HintPath>$(S1ApiAssemblyPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="LavaGang.MelonLoader" />
+    <PackageReference Include="MoonSharp" GeneratePathProperty="true" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'MonoMelon'">
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(MonoAssembliesPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Il2CppMelon'">
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(Il2CppAssembliesPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="SelectMonoMoonSharpRuntime" AfterTargets="Build"
+          Condition="'$(Configuration)' == 'MonoMelon'">
+    <PropertyGroup>
+      <MonoMoonSharpPath>$(PkgMoonSharp)\lib\net40-client\MoonSharp.Interpreter.dll</MonoMoonSharpPath>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(MonoMoonSharpPath)')"
+           Text="MoonSharp's net40-client runtime assembly was not found at $(MonoMoonSharpPath)." />
+    <Copy SourceFiles="$(MonoMoonSharpPath)"
+          DestinationFiles="$(TargetDir)MoonSharp.Interpreter.dll"
+          SkipUnchangedFiles="false" />
+  </Target>
+
+  <Target Name="DeployMono" AfterTargets="Build"
+          Condition="'$(S1LuaAutomateLocalDeployment)' == 'true' and '$(Configuration)' == 'MonoMelon'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(LocalMonoDeploymentPath)\Mods\S1Lua.Mono.MelonLoader.dll" />
+  </Target>
+
+  <Target Name="DeployIl2Cpp" AfterTargets="Build"
+          Condition="'$(S1LuaAutomateLocalDeployment)' == 'true' and '$(Configuration)' == 'Il2CppMelon'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(LocalIl2CppDeploymentPath)\Mods\S1Lua.Il2Cpp.MelonLoader.dll" />
+  </Target>
+</Project>

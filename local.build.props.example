@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <!-- A sibling S1API checkout is the preferred configuration-matched reference. -->
+    <S1ApiProjectPath>$(MSBuildThisFileDirectory)..\S1API\S1API\S1API.csproj</S1ApiProjectPath>
+
+    <!-- Required only when building without the sibling S1API project. -->
+    <S1ApiMonoAssemblyPath>D:\Path\To\S1API.Mono.MelonLoader.dll</S1ApiMonoAssemblyPath>
+    <S1ApiIl2CppAssemblyPath>D:\Path\To\S1API.Il2Cpp.MelonLoader.dll</S1ApiIl2CppAssemblyPath>
+
+    <MonoAssembliesPath>C:\Path\To\Schedule I Mono\Schedule I_Data\Managed</MonoAssembliesPath>
+    <Il2CppAssembliesPath>C:\Path\To\Schedule I IL2CPP\MelonLoader\Il2CppAssemblies</Il2CppAssembliesPath>
+    <MelonLoaderMonoAssembliesPath>C:\Path\To\Schedule I Mono\MelonLoader\net35</MelonLoaderMonoAssembliesPath>
+    <MelonLoaderAssembliesPath>C:\Path\To\Schedule I IL2CPP\MelonLoader\net6</MelonLoaderAssembliesPath>
+    <LocalMonoDeploymentPath>C:\Path\To\Schedule I Mono</LocalMonoDeploymentPath>
+    <LocalIl2CppDeploymentPath>C:\Path\To\Schedule I IL2CPP</LocalIl2CppDeploymentPath>
+    <S1LuaAutomateLocalDeployment>false</S1LuaAutomateLocalDeployment>
+  </PropertyGroup>
+</Project>

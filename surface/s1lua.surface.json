@@ -1,0 +1,891 @@
+{
+  "schemaVersion": 1,
+  "surfaceVersion": "0.2.1",
+  "s1ApiVersion": "3.1.15",
+  "summary": "A deliberately small Lua surface for first-time Schedule I modders.",
+  "types": [
+    {
+      "name": "S1LuaModOptions",
+      "summary": "Names and identifies one Lua mod.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Stable lowercase ID such as yourname.my-first-mod."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Name shown in logs and diagnostics."
+        },
+        {
+          "name": "version",
+          "type": "string",
+          "required": false,
+          "default": "1.0.0",
+          "description": "Your mod version."
+        },
+        {
+          "name": "author",
+          "type": "string",
+          "required": false,
+          "description": "Your name or handle."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "A short description of the mod."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaItemOptions",
+      "summary": "Declares an item. S1Lua registers it at the safe S1API lifecycle stage.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Local item ID. S1Lua prefixes it with the mod ID."
+        },
+        {
+          "name": "clone",
+          "type": "string",
+          "required": false,
+          "description": "Base-game item ID to clone. Recommended for first mods."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Display name. Required for items that do not clone another item."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Inventory description. A clone keeps its original description when omitted."
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "product, packaging, growing, tools, furniture, lighting, cash, consumable, equipment, ingredient, decoration, or clothing."
+        },
+        {
+          "name": "stack",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum quantity in one slot, from 1 to 999."
+        },
+        {
+          "name": "price",
+          "type": "number",
+          "required": false,
+          "description": "Purchase price, zero or greater."
+        },
+        {
+          "name": "resell",
+          "type": "number",
+          "required": false,
+          "description": "Resell fraction from 0 to 1."
+        },
+        {
+          "name": "legal",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the item is legal."
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "required": false,
+          "description": "PNG path inside this mod folder."
+        },
+        {
+          "name": "shops",
+          "type": "string|string[]",
+          "required": false,
+          "description": "Use compatible or a list of in-game shop names."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaPosition",
+      "summary": "A fixed position in the game world.",
+      "fields": [
+        {
+          "name": "x",
+          "type": "number",
+          "required": true,
+          "description": "World X coordinate."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": true,
+          "description": "World Y coordinate."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": true,
+          "description": "World Z coordinate."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaMarkerOptions",
+      "summary": "Declares a phone-map marker at a position or following an NPC.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Local marker ID. S1Lua prefixes it with the mod ID."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Text shown beside the marker."
+        },
+        {
+          "name": "position",
+          "type": "S1LuaPosition",
+          "required": false,
+          "description": "Fixed world position. Use this or npc, not both."
+        },
+        {
+          "name": "npc",
+          "type": "string",
+          "required": false,
+          "description": "NPC ID for a marker that follows that NPC. Use this or position, not both."
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "required": false,
+          "description": "PNG path inside this mod folder."
+        },
+        {
+          "name": "text",
+          "type": "\u0022always\u0022|\u0022hover\u0022|\u0022off\u0022",
+          "required": false,
+          "default": "always",
+          "description": "When the marker label is shown."
+        },
+        {
+          "name": "visible",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Whether the marker starts visible."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaPhoneCallOptions",
+      "summary": "Queues a simple staged phone call.",
+      "fields": [
+        {
+          "name": "caller",
+          "type": "string",
+          "required": false,
+          "default": "Unknown Caller",
+          "description": "Caller name when npc is not supplied."
+        },
+        {
+          "name": "npc",
+          "type": "string",
+          "required": false,
+          "description": "NPC ID whose name and portrait should be used."
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "required": false,
+          "description": "PNG caller portrait used when npc is not supplied."
+        },
+        {
+          "name": "stages",
+          "type": "string[]",
+          "required": true,
+          "description": "One to twenty lines shown in order."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaNpcInfo",
+      "summary": "A primitive snapshot of an NPC. It contains no Unity or CLR objects.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Stable in-game NPC ID."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "NPC full name."
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "required": true,
+          "description": "NPC\u0027s assigned region."
+        },
+        {
+          "name": "relationship",
+          "type": "number",
+          "required": true,
+          "description": "Normalized relationship from 0 to 1."
+        },
+        {
+          "name": "is_unlocked",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether the NPC is unlocked."
+        },
+        {
+          "name": "is_dead",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether the NPC is dead."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaTimeInfo",
+      "summary": "A primitive snapshot of the current game time.",
+      "fields": [
+        {
+          "name": "day",
+          "type": "string",
+          "required": true,
+          "description": "Current weekday in lowercase."
+        },
+        {
+          "name": "time",
+          "type": "integer",
+          "required": true,
+          "description": "Current 24-hour time such as 1330."
+        },
+        {
+          "name": "formatted",
+          "type": "string",
+          "required": true,
+          "description": "Current time formatted for display."
+        },
+        {
+          "name": "elapsed_days",
+          "type": "integer",
+          "required": true,
+          "description": "Number of elapsed game days."
+        },
+        {
+          "name": "is_night",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether it is currently nighttime."
+        },
+        {
+          "name": "is_sleeping",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether sleep is in progress."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaWeatherInfo",
+      "summary": "A primitive snapshot of the current weather weights.",
+      "fields": [
+        {
+          "name": "primary",
+          "type": "string",
+          "required": true,
+          "description": "Weather component with the highest weight."
+        },
+        {
+          "name": "sunny",
+          "type": "number",
+          "required": true,
+          "description": "Sunny weight from 0 to 1."
+        },
+        {
+          "name": "cloudy",
+          "type": "number",
+          "required": true,
+          "description": "Cloudy weight from 0 to 1."
+        },
+        {
+          "name": "rainy",
+          "type": "number",
+          "required": true,
+          "description": "Rainy weight from 0 to 1."
+        },
+        {
+          "name": "stormy",
+          "type": "number",
+          "required": true,
+          "description": "Stormy weight from 0 to 1."
+        },
+        {
+          "name": "snowy",
+          "type": "number",
+          "required": true,
+          "description": "Snowy weight from 0 to 1."
+        },
+        {
+          "name": "foggy",
+          "type": "number",
+          "required": true,
+          "description": "Foggy weight from 0 to 1."
+        },
+        {
+          "name": "windy",
+          "type": "number",
+          "required": true,
+          "description": "Windy weight from 0 to 1."
+        },
+        {
+          "name": "hail",
+          "type": "number",
+          "required": true,
+          "description": "Hail weight from 0 to 1."
+        },
+        {
+          "name": "sleet",
+          "type": "number",
+          "required": true,
+          "description": "Sleet weight from 0 to 1."
+        }
+      ]
+    },
+    {
+      "name": "S1LuaQuestInfo",
+      "summary": "A primitive snapshot of a known base-game quest.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Normalized quest identifier."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Quest title shown in game."
+        }
+      ]
+    }
+  ],
+  "bindings": [
+    {
+      "path": "s1.mod",
+      "scope": "global",
+      "handler": "CreateMod",
+      "signature": "s1.mod(options) -\u003E mod",
+      "summary": "Creates the single mod declared by this script.",
+      "parameters": [
+        {
+          "name": "options",
+          "type": "S1LuaModOptions",
+          "required": true,
+          "description": "Mod identity and display information."
+        }
+      ],
+      "returns": "S1LuaMod",
+      "examples": [
+        "local mod = s1.mod { id = \u0022alex.golden-cuke\u0022, name = \u0022Golden Cuke\u0022 }"
+      ]
+    },
+    {
+      "path": "s1.log",
+      "scope": "global",
+      "handler": "Log",
+      "signature": "s1.log(message)",
+      "summary": "Writes an informational line to the MelonLoader log.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Message to write."
+        }
+      ]
+    },
+    {
+      "path": "s1.warn",
+      "scope": "global",
+      "handler": "Warn",
+      "signature": "s1.warn(message)",
+      "summary": "Writes a warning to the MelonLoader log.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Warning to write."
+        }
+      ]
+    },
+    {
+      "path": "s1.time",
+      "scope": "global",
+      "handler": "GetTime",
+      "signature": "s1.time() -\u003E S1LuaTimeInfo|nil",
+      "summary": "Returns the current game-time snapshot, or nil outside a loaded game.",
+      "returns": "S1LuaTimeInfo|nil",
+      "s1ApiUids": [
+        "S1API.GameTime.TimeManager.CurrentDay",
+        "S1API.GameTime.TimeManager.ElapsedDays",
+        "S1API.GameTime.TimeManager.CurrentTime",
+        "S1API.GameTime.TimeManager.IsNight",
+        "S1API.GameTime.TimeManager.SleepInProgress",
+        "S1API.GameTime.TimeManager.GetFormatted12HourTime"
+      ]
+    },
+    {
+      "path": "s1.weather",
+      "scope": "global",
+      "handler": "GetWeather",
+      "signature": "s1.weather() -\u003E S1LuaWeatherInfo|nil",
+      "summary": "Returns current weather weights, or nil before weather is available.",
+      "returns": "S1LuaWeatherInfo|nil",
+      "s1ApiUids": [
+        "S1API.Weather.WeatherManager.Current"
+      ]
+    },
+    {
+      "path": "mod.item",
+      "scope": "mod",
+      "handler": "DeclareItem",
+      "signature": "mod:item(options)",
+      "summary": "Declares a beginner-friendly S1API item without exposing builders or Unity objects.",
+      "parameters": [
+        {
+          "name": "options",
+          "type": "S1LuaItemOptions",
+          "required": true,
+          "description": "Item fields and optional shop placement."
+        }
+      ],
+      "examples": [
+        "mod:item { id = \u0022golden_cuke\u0022, clone = \u0022cuke\u0022, name = \u0022Golden Cuke\u0022, price = 250, shops = \u0022compatible\u0022 }"
+      ],
+      "s1ApiUids": [
+        "S1API.Items.Storable.ItemCreator.CreateBuilder",
+        "S1API.Items.Storable.ItemCreator.CloneFrom(System.String)",
+        "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithBasicInfo(System.String,System.String,System.String,S1API.Items.ItemCategory)",
+        "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithStackLimit(System.Int32)",
+        "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithPricing(System.Single,System.Single)",
+        "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithLegalStatus(S1API.Items.LegalStatus)",
+        "S1API.Utils.ImageUtils.LoadImage(System.String)",
+        "S1API.Items.Storable.StorableItemDefinitionBuilder.Build",
+        "S1API.Items.ItemManager.GetDefinition(System.String)",
+        "S1API.Shops.ShopManager.AddToCompatibleShops(S1API.Items.ItemDefinition,System.Nullable{System.Single})",
+        "S1API.Shops.ShopManager.AddToShops(S1API.Items.ItemDefinition,System.String[])"
+      ]
+    },
+    {
+      "path": "mod.on",
+      "scope": "mod",
+      "handler": "Subscribe",
+      "signature": "mod:on(event, callback)",
+      "summary": "Runs a function when a supported game event occurs.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Event name from the list below."
+        },
+        {
+          "name": "callback",
+          "type": "fun(value?: number)",
+          "required": true,
+          "description": "Function to run. sleep_ended receives minutes skipped."
+        }
+      ],
+      "examples": [
+        "mod:on(\u0022game_loaded\u0022, function() s1.log(\u0022Ready!\u0022) end)"
+      ]
+    },
+    {
+      "path": "mod.get",
+      "scope": "mod",
+      "handler": "GetState",
+      "signature": "mod:get(key, default) -\u003E value",
+      "summary": "Reads a saved string, number, or boolean for this mod.",
+      "parameters": [
+        {
+          "name": "key",
+          "type": "string",
+          "required": true,
+          "description": "Storage key."
+        },
+        {
+          "name": "default",
+          "type": "string|number|boolean|nil",
+          "required": false,
+          "description": "Value returned when the key has not been saved."
+        }
+      ],
+      "returns": "string|number|boolean|nil",
+      "s1ApiUids": [
+        "S1API.Internal.Abstraction.Saveable",
+        "S1API.Saveables.SaveableField.#ctor(System.String)"
+      ]
+    },
+    {
+      "path": "mod.set",
+      "scope": "mod",
+      "handler": "SetState",
+      "signature": "mod:set(key, value)",
+      "summary": "Stores a string, number, boolean, or nil in this save.",
+      "parameters": [
+        {
+          "name": "key",
+          "type": "string",
+          "required": true,
+          "description": "Storage key."
+        },
+        {
+          "name": "value",
+          "type": "string|number|boolean|nil",
+          "required": true,
+          "description": "Value to save; nil removes it."
+        }
+      ],
+      "s1ApiUids": [
+        "S1API.Internal.Abstraction.Saveable",
+        "S1API.Saveables.SaveableField.#ctor(System.String)"
+      ]
+    },
+    {
+      "path": "mod.save",
+      "scope": "mod",
+      "handler": "RequestSave",
+      "signature": "mod:save() -\u003E boolean",
+      "summary": "Asks the game to save now and returns whether the request was accepted.",
+      "returns": "boolean",
+      "s1ApiUids": [
+        "S1API.Internal.Abstraction.Saveable.RequestGameSave"
+      ]
+    },
+    {
+      "path": "mod.npc",
+      "scope": "mod",
+      "handler": "CreateNpcProxy",
+      "signature": "mod:npc(id) -\u003E S1LuaNpc",
+      "summary": "Creates a reload-safe proxy for an existing NPC ID.",
+      "parameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Stable NPC ID such as benji_coleman."
+        }
+      ],
+      "returns": "S1LuaNpc",
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)"
+      ]
+    },
+    {
+      "path": "mod.marker",
+      "scope": "mod",
+      "handler": "DeclareMarker",
+      "signature": "mod:marker(options) -\u003E string",
+      "summary": "Declares a phone-map marker created after the game loads.",
+      "parameters": [
+        {
+          "name": "options",
+          "type": "S1LuaMarkerOptions",
+          "required": true,
+          "description": "Marker identity, target, and presentation."
+        }
+      ],
+      "returns": "string",
+      "s1ApiUids": [
+        "S1API.Map.MapPOIBuilder.#ctor(System.String)",
+        "S1API.Map.MapPOIBuilder.WithLabel(System.String)",
+        "S1API.Map.MapPOIBuilder.WithPosition(UnityEngine.Vector3)",
+        "S1API.Map.MapPOIBuilder.WithTarget(UnityEngine.Transform)",
+        "S1API.Map.MapPOIBuilder.WithIcon(UnityEngine.Sprite)",
+        "S1API.Map.MapPOIBuilder.WithTextVisibility(S1API.Map.MapPOITextVisibility)",
+        "S1API.Map.MapPOIBuilder.WithVisibility(System.Boolean)",
+        "S1API.Map.MapPOIBuilder.Build",
+        "S1API.Utils.ImageUtils.LoadImage(System.String)"
+      ]
+    },
+    {
+      "path": "mod.call",
+      "scope": "mod",
+      "handler": "QueuePhoneCall",
+      "signature": "mod:call(options) -\u003E boolean",
+      "summary": "Queues a simple phone call and returns false when its NPC caller is unavailable.",
+      "parameters": [
+        {
+          "name": "options",
+          "type": "S1LuaPhoneCallOptions",
+          "required": true,
+          "description": "Caller and staged text."
+        }
+      ],
+      "returns": "boolean",
+      "s1ApiUids": [
+        "S1API.PhoneCalls.PhoneCallDefinition.#ctor(System.String,UnityEngine.Sprite)",
+        "S1API.PhoneCalls.PhoneCallDefinition.#ctor(S1API.Entities.NPC)",
+        "S1API.PhoneCalls.PhoneCallDefinition.AddStage(System.String)",
+        "S1API.PhoneCalls.CallManager.QueueCall(S1API.PhoneCalls.PhoneCallDefinition)",
+        "S1API.Utils.ImageUtils.LoadImage(System.String)"
+      ]
+    },
+    {
+      "path": "mod.quest",
+      "scope": "mod",
+      "handler": "CreateQuestProxy",
+      "signature": "mod:quest(name) -\u003E S1LuaQuest",
+      "summary": "Creates a read-only proxy for a known base-game quest title or compact ID.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Quest title such as Getting Started, or ID such as gettingstarted."
+        }
+      ],
+      "returns": "S1LuaQuest",
+      "s1ApiUids": [
+        "S1API.Quests.QuestManager.Get\u0060\u00601"
+      ]
+    },
+    {
+      "path": "npc.info",
+      "scope": "npc",
+      "handler": "GetNpcInfo",
+      "signature": "npc:info() -\u003E S1LuaNpcInfo|nil",
+      "summary": "Returns a primitive NPC snapshot, or nil while that NPC is unavailable.",
+      "returns": "S1LuaNpcInfo|nil",
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)",
+        "S1API.Entities.NPC.FullName",
+        "S1API.Entities.NPC.Region",
+        "S1API.Entities.NPC.IsDead",
+        "S1API.Entities.NPC.Relationship",
+        "S1API.Entities.NPCRelationship.Normalized",
+        "S1API.Entities.NPCRelationship.IsUnlocked"
+      ]
+    },
+    {
+      "path": "npc.say",
+      "scope": "npc",
+      "handler": "ShowNpcText",
+      "signature": "npc:say(text, seconds) -\u003E boolean",
+      "summary": "Shows temporary world-space text above the NPC.",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Text to show."
+        },
+        {
+          "name": "seconds",
+          "type": "number",
+          "required": false,
+          "default": "4",
+          "description": "Display duration from 0.25 to 60 seconds."
+        }
+      ],
+      "returns": "boolean",
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)",
+        "S1API.Entities.NPCDialogue.ShowWorldText(System.String,System.Single)"
+      ]
+    },
+    {
+      "path": "npc.text",
+      "scope": "npc",
+      "handler": "SendNpcMessage",
+      "signature": "npc:text(message) -\u003E boolean",
+      "summary": "Sends a networked phone message from the NPC.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Message to send."
+        }
+      ],
+      "returns": "boolean",
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)",
+        "S1API.Entities.NPCMessaging.SendTextMessage(System.String,S1API.Messaging.Response[],System.Single,System.Boolean)"
+      ]
+    },
+    {
+      "path": "npc.add_relationship",
+      "scope": "npc",
+      "handler": "AddNpcRelationship",
+      "signature": "npc:add_relationship(amount) -\u003E boolean",
+      "summary": "Adds a networked relationship delta from -5 to 5.",
+      "parameters": [
+        {
+          "name": "amount",
+          "type": "number",
+          "required": true,
+          "description": "Relationship delta."
+        }
+      ],
+      "returns": "boolean",
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)",
+        "S1API.Entities.NPCRelationship.Add(System.Single,System.Boolean)"
+      ]
+    },
+    {
+      "path": "npc.unlock",
+      "scope": "npc",
+      "handler": "UnlockNpc",
+      "signature": "npc:unlock() -\u003E boolean",
+      "summary": "Unlocks the NPC using S1API\u0027s direct-approach default.",
+      "returns": "boolean",
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)",
+        "S1API.Entities.NPCRelationship.Unlock(S1API.Entities.NPCRelationship.UnlockType,System.Boolean)"
+      ]
+    },
+    {
+      "path": "npc.on",
+      "scope": "npc",
+      "handler": "SubscribeNpc",
+      "signature": "npc:on(event, callback)",
+      "summary": "Listens for relationship_changed, unlocked, or died and rebinds after loads.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "\u0022relationship_changed\u0022|\u0022unlocked\u0022|\u0022died\u0022",
+          "required": true,
+          "description": "NPC event name."
+        },
+        {
+          "name": "callback",
+          "type": "function",
+          "required": true,
+          "description": "Callback; relationship_changed receives a number and unlocked receives type and notify."
+        }
+      ],
+      "s1ApiUids": [
+        "S1API.Entities.NPC.Get(System.String)",
+        "S1API.Entities.NPCRelationship.OnChanged",
+        "S1API.Entities.NPCRelationship.OnUnlocked",
+        "S1API.Entities.NPC.OnDeath"
+      ]
+    },
+    {
+      "path": "quest.info",
+      "scope": "quest",
+      "handler": "GetQuestInfo",
+      "signature": "quest:info() -\u003E S1LuaQuestInfo|nil",
+      "summary": "Returns a primitive quest snapshot, or nil before the quest is available.",
+      "returns": "S1LuaQuestInfo|nil",
+      "s1ApiUids": [
+        "S1API.Quests.QuestManager.Get\u0060\u00601",
+        "S1API.Quests.QuestWrapper.Title"
+      ]
+    },
+    {
+      "path": "quest.on",
+      "scope": "quest",
+      "handler": "SubscribeQuest",
+      "signature": "quest:on(event, callback)",
+      "summary": "Listens for completed or failed and rebinds after loads.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "\u0022completed\u0022|\u0022failed\u0022",
+          "required": true,
+          "description": "Quest event name."
+        },
+        {
+          "name": "callback",
+          "type": "fun()",
+          "required": true,
+          "description": "Function to run."
+        }
+      ],
+      "s1ApiUids": [
+        "S1API.Quests.QuestManager.Get\u0060\u00601",
+        "S1API.Quests.QuestWrapper.OnComplete",
+        "S1API.Quests.QuestWrapper.OnFail"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "game_loading",
+      "summary": "The game is about to load save data.",
+      "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnPreLoad"
+    },
+    {
+      "name": "game_loaded",
+      "summary": "The save is loaded and game objects are ready.",
+      "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnLoadComplete"
+    },
+    {
+      "name": "scene_changing",
+      "summary": "The current scene is about to change.",
+      "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnPreSceneChange"
+    },
+    {
+      "name": "before_save",
+      "summary": "The host is beginning a game save.",
+      "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnSaveStart"
+    },
+    {
+      "name": "after_save",
+      "summary": "The host finished a game save.",
+      "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnSaveComplete"
+    },
+    {
+      "name": "hour_passed",
+      "summary": "A new in-game hour started.",
+      "s1ApiUid": "S1API.GameTime.TimeManager.OnHourPass"
+    },
+    {
+      "name": "day_passed",
+      "summary": "A new in-game day started.",
+      "s1ApiUid": "S1API.GameTime.TimeManager.OnDayPass"
+    },
+    {
+      "name": "week_passed",
+      "summary": "A new in-game week started.",
+      "s1ApiUid": "S1API.GameTime.TimeManager.OnWeekPass"
+    },
+    {
+      "name": "sleep_started",
+      "summary": "The player started sleeping.",
+      "s1ApiUid": "S1API.GameTime.TimeManager.OnSleepStart"
+    },
+    {
+      "name": "sleep_ended",
+      "summary": "Sleep ended; the callback receives minutes skipped.",
+      "s1ApiUid": "S1API.GameTime.TimeManager.OnSleepEnd"
+    },
+    {
+      "name": "weather_changed",
+      "summary": "Weather became available or its weights changed.",
+      "s1ApiUid": "S1API.Weather.WeatherManager.OnWeatherChanged"
+    }
+  ]
+}

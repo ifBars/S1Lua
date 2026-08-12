@@ -1,0 +1,20 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)local.build.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)local.build.props')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\S1API\local.build.props"
+          Condition="!Exists('$(MSBuildThisFileDirectory)local.build.props') and Exists('$(MSBuildThisFileDirectory)..\S1API\local.build.props')" />
+
+  <PropertyGroup>
+    <S1LuaVersion>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)version.txt').Trim())</S1LuaVersion>
+    <Version>$(S1LuaVersion)</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <Configurations>Debug;Release;MonoMelon;Il2CppMelon</Configurations>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591;NU1507</NoWarn>
+  </PropertyGroup>
+</Project>

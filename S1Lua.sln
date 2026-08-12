@@ -1,0 +1,48 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S1Lua.Core", "src\S1Lua.Core\S1Lua.Core.csproj", "{5B4C078F-1BA8-46A1-922B-CB511548471A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S1Lua.Runtime", "src\S1Lua.Runtime\S1Lua.Runtime.csproj", "{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S1Lua.Generator", "tools\S1Lua.Generator\S1Lua.Generator.csproj", "{A840081E-64CD-459A-8277-00C1542B49A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S1Lua.Tests", "tests\S1Lua.Tests\S1Lua.Tests.csproj", "{3561F9E7-145F-4770-B21C-9754706558E7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		MonoMelon|Any CPU = MonoMelon|Any CPU
+		Il2CppMelon|Any CPU = Il2CppMelon|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.MonoMelon|Any CPU.ActiveCfg = Release|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.MonoMelon|Any CPU.Build.0 = Release|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.Il2CppMelon|Any CPU.ActiveCfg = Release|Any CPU
+		{5B4C078F-1BA8-46A1-922B-CB511548471A}.Il2CppMelon|Any CPU.Build.0 = Release|Any CPU
+		{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}.Debug|Any CPU.ActiveCfg = MonoMelon|Any CPU
+		{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}.Release|Any CPU.ActiveCfg = MonoMelon|Any CPU
+		{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}.MonoMelon|Any CPU.ActiveCfg = MonoMelon|Any CPU
+		{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}.MonoMelon|Any CPU.Build.0 = MonoMelon|Any CPU
+		{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}.Il2CppMelon|Any CPU.ActiveCfg = Il2CppMelon|Any CPU
+		{CB369B53-5E78-40FB-8C6A-F3049F6E59D3}.Il2CppMelon|Any CPU.Build.0 = Il2CppMelon|Any CPU
+		{A840081E-64CD-459A-8277-00C1542B49A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A840081E-64CD-459A-8277-00C1542B49A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A840081E-64CD-459A-8277-00C1542B49A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A840081E-64CD-459A-8277-00C1542B49A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A840081E-64CD-459A-8277-00C1542B49A1}.MonoMelon|Any CPU.ActiveCfg = Release|Any CPU
+		{A840081E-64CD-459A-8277-00C1542B49A1}.Il2CppMelon|Any CPU.ActiveCfg = Release|Any CPU
+		{3561F9E7-145F-4770-B21C-9754706558E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3561F9E7-145F-4770-B21C-9754706558E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3561F9E7-145F-4770-B21C-9754706558E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3561F9E7-145F-4770-B21C-9754706558E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3561F9E7-145F-4770-B21C-9754706558E7}.MonoMelon|Any CPU.ActiveCfg = Release|Any CPU
+		{3561F9E7-145F-4770-B21C-9754706558E7}.Il2CppMelon|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+EndGlobal

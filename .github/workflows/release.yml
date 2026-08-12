@@ -1,0 +1,105 @@
+name: release
+
+on:
+  workflow_run:
+    workflows: [validate]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out validated commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Get-Content -LiteralPath version.txt -Raw).Trim()
+          if ($version -notmatch '^[0-9]+\.[0-9]+\.[0-9]+$') {
+            throw "Invalid S1Lua version: $version"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+
+      - name: Check whether release already exists
+        id: existing
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null
+          "release_exists=$($LASTEXITCODE -eq 0)".ToLowerInvariant() >> $env:GITHUB_OUTPUT
+          exit 0
+
+      - name: Download validated archives
+        if: steps.existing.outputs.release_exists != 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_RUN: ${{ github.event.workflow_run.id }}
+        run: |
+          gh run download $env:VALIDATION_RUN `
+            --repo $env:GITHUB_REPOSITORY `
+            --name s1lua-runtime-packages `
+            --dir release-assets
+
+      - name: Verify release payload and checksums
+        if: steps.existing.outputs.release_exists != 'true'
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $expected = @(
+            "release-assets/S1Lua-$env:RELEASE_VERSION-Mono.zip",
+            "release-assets/S1Lua-$env:RELEASE_VERSION-Il2Cpp.zip"
+          )
+          ./scripts/Validate-Package.ps1 -Archive $expected
+          $checksums = foreach ($path in $expected) {
+            $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $path
+            "$($hash.Hash.ToLowerInvariant())  $([System.IO.Path]::GetFileName($path))"
+          }
+          [System.IO.File]::WriteAllLines(
+            (Join-Path (Resolve-Path release-assets) "SHA256SUMS.txt"),
+            $checksums,
+            [System.Text.UTF8Encoding]::new($false))
+
+      - name: Tag validated commit
+        if: steps.existing.outputs.release_exists != 'true'
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          $remoteTag = git ls-remote --tags origin "refs/tags/$env:RELEASE_TAG"
+          if ([string]::IsNullOrWhiteSpace($remoteTag)) {
+            git tag $env:RELEASE_TAG '${{ github.event.workflow_run.head_sha }}'
+            git push origin $env:RELEASE_TAG
+          }
+
+      - name: Publish GitHub release
+        if: steps.existing.outputs.release_exists != 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create $env:RELEASE_TAG `
+            release-assets/*.zip `
+            release-assets/SHA256SUMS.txt `
+            --repo $env:GITHUB_REPOSITORY `
+            --title "S1Lua $env:RELEASE_VERSION" `
+            --generate-notes `
+            --verify-tag

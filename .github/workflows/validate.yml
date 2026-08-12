@@ -1,0 +1,147 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-contract:
+    name: Generated surface and tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out S1Lua
+        uses: actions/checkout@v4
+        with:
+          path: S1Lua
+
+      - name: Resolve anchored S1API version
+        id: versions
+        shell: pwsh
+        working-directory: S1Lua
+        run: |
+          $surface = Get-Content -LiteralPath surface/s1lua.surface.json -Raw | ConvertFrom-Json
+          "s1api=$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
+          "ref=v$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
+
+      - name: Check out anchored S1API source
+        uses: actions/checkout@v4
+        with:
+          repository: ifBars/S1API
+          ref: ${{ steps.versions.outputs.ref }}
+          path: S1API
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Validate generated surface and tests
+        shell: pwsh
+        working-directory: S1Lua
+        run: ./scripts/Validate.ps1 -SkipRuntime
+
+  full-runtime:
+    name: Mono and IL2CPP release build
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out S1Lua
+        uses: actions/checkout@v4
+        with:
+          path: S1Lua
+
+      - name: Resolve anchored S1API version
+        id: versions
+        shell: pwsh
+        working-directory: S1Lua
+        run: |
+          $surface = Get-Content -LiteralPath surface/s1lua.surface.json -Raw | ConvertFrom-Json
+          "s1api=$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
+          "ref=v$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
+
+      - name: Check out anchored S1API source
+        uses: actions/checkout@v4
+        with:
+          repository: ifBars/S1API
+          ref: ${{ steps.versions.outputs.ref }}
+          path: S1API
+
+      - name: Check out Mono compile assemblies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.GAME_ASSEMBLIES_REPO }}
+          token: ${{ secrets.GAME_ASSEMBLIES_TOKEN }}
+          ref: main
+          path: game-assemblies
+          fetch-depth: 1
+
+      - name: Check out IL2CPP compile assemblies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.IL2CPP_ASSEMBLIES_REPO }}
+          token: ${{ secrets.IL2CPP_ASSEMBLIES_TOKEN }}
+          ref: main
+          path: il2cpp-scheduleone-assemblies
+          fetch-depth: 1
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Download the published S1API release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          S1API_VERSION: ${{ steps.versions.outputs.s1api }}
+        run: |
+          $download = New-Item -ItemType Directory -Force -Path S1Lua/.ci/download
+          $release = New-Item -ItemType Directory -Force -Path S1Lua/.ci/s1api-release
+          gh release download "v$env:S1API_VERSION" `
+            --repo ifBars/S1API `
+            --pattern "S1API-Forked-$env:S1API_VERSION.zip" `
+            --dir $download.FullName
+          Expand-Archive `
+            -LiteralPath (Join-Path $download.FullName "S1API-Forked-$env:S1API_VERSION.zip") `
+            -DestinationPath $release.FullName
+
+      - name: Prepare released-assembly build
+        shell: pwsh
+        working-directory: S1Lua
+        run: |
+          ./scripts/Prepare-CiBuild.ps1 `
+            -S1ApiReleaseDirectory .ci/s1api-release `
+            -MonoAssembliesDirectory ../game-assemblies/Managed `
+            -Il2CppAssembliesDirectory ../il2cpp-scheduleone-assemblies/MelonLoader/Il2CppAssemblies
+
+      - name: Validate both runtimes
+        shell: pwsh
+        working-directory: S1Lua
+        run: ./scripts/Validate.ps1 -SkipDocs
+
+      - name: Build release archives
+        shell: pwsh
+        working-directory: S1Lua
+        run: |
+          ./scripts/Package.ps1 -Runtime MonoMelon -SkipBuild
+          ./scripts/Package.ps1 -Runtime Il2CppMelon -SkipBuild
+          ./scripts/Validate-Package.ps1 -Archive (Get-ChildItem artifacts/*.zip).FullName
+
+      - name: Upload tested release archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: s1lua-runtime-packages
+          path: S1Lua/artifacts/*.zip
+          if-no-files-found: error
+          retention-days: 14

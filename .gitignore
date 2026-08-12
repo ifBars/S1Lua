@@ -1,0 +1,23 @@
+bin/
+obj/
+artifacts/
+_site/
+.ci/
+TestResults/
+.vs/
+.idea/
+*.user
+*.suo
+local.build.props
+*.nupkg
+*.zip
+
+# Never commit local game, MelonLoader, or generated IL2CPP artifacts.
+Game/
+Mods/
+UserLibs/
+MelonLoader/
+Il2CppAssemblies/
+Assembly-CSharp.dll
+ScheduleOne.Core.dll
+Latest.log

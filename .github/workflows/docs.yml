@@ -1,0 +1,81 @@
+name: documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out S1Lua
+        uses: actions/checkout@v5
+        with:
+          path: S1Lua
+
+      - name: Resolve anchored S1API version
+        id: versions
+        shell: pwsh
+        working-directory: S1Lua
+        run: |
+          $surface = Get-Content -LiteralPath surface/s1lua.surface.json -Raw | ConvertFrom-Json
+          "ref=v$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
+
+      - name: Check out anchored S1API source
+        uses: actions/checkout@v5
+        with:
+          repository: ifBars/S1API
+          ref: ${{ steps.versions.outputs.ref }}
+          path: S1API
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore documentation tools
+        working-directory: S1Lua
+        run: dotnet tool restore
+
+      - name: Verify generated Lua reference
+        shell: pwsh
+        working-directory: S1Lua
+        run: ./scripts/Generate.ps1 -Check
+
+      - name: Build documentation
+        working-directory: S1Lua
+        run: dotnet docfx docfx.json --warningsAsErrors
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: S1Lua/_site
+
+  deploy:
+    name: Deploy documentation
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
