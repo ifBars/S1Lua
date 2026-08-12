@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Check out S1Lua
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: S1Lua
 
@@ -34,14 +34,14 @@ jobs:
           "ref=v$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
 
       - name: Check out anchored S1API source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ifBars/S1API
           ref: ${{ steps.versions.outputs.ref }}
           path: S1API
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 9.0.x
 
@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Check out S1Lua
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: S1Lua
 
@@ -83,14 +83,14 @@ jobs:
           "ref=v$($surface.s1ApiVersion)" >> $env:GITHUB_OUTPUT
 
       - name: Check out anchored S1API source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ifBars/S1API
           ref: ${{ steps.versions.outputs.ref }}
           path: S1API
 
       - name: Check out Mono compile assemblies
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ secrets.GAME_ASSEMBLIES_REPO }}
           token: ${{ secrets.GAME_ASSEMBLIES_TOKEN }}
@@ -99,7 +99,7 @@ jobs:
           fetch-depth: 1
 
       - name: Check out IL2CPP compile assemblies
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ secrets.IL2CPP_ASSEMBLIES_REPO }}
           token: ${{ secrets.IL2CPP_ASSEMBLIES_TOKEN }}
@@ -108,7 +108,7 @@ jobs:
           fetch-depth: 1
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 9.0.x
 
@@ -151,7 +151,7 @@ jobs:
           ./scripts/Validate-Package.ps1 -Archive (Get-ChildItem artifacts/*.zip).FullName
 
       - name: Upload tested release archives
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: s1lua-runtime-packages
           path: S1Lua/artifacts/*.zip
