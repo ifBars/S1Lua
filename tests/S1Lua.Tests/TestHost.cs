@@ -8,6 +8,11 @@ internal sealed class TestHost : IS1LuaHost
     internal List<(S1LuaLogLevel Level, string Source, string Message)> Messages { get; } = new();
     internal InMemoryModStateStore MemoryState { get; } = new();
     internal bool SaveAccepted { get; set; } = true;
+    internal MoneySnapshot Money { get; set; } = new(0, 0, 0);
+    internal List<(double Amount, bool Visualize, bool Sound)> CashChanges { get; } = new();
+    internal ProgressSnapshot? Progress { get; set; }
+    internal List<int> XpAwards { get; } = new();
+    internal PlayerSnapshot? Player { get; set; }
 
     public IModStateStore State => MemoryState;
 
@@ -35,6 +40,29 @@ internal sealed class TestHost : IS1LuaHost
     public GameTimeSnapshot? GetGameTime() => null;
 
     public WeatherSnapshot? GetWeather() => null;
+
+    public MoneySnapshot GetMoney() => Money;
+
+    public void ChangeCash(double amount, bool visualizeChange, bool playCashSound) =>
+        CashChanges.Add((amount, visualizeChange, playCashSound));
+
+    public ProgressSnapshot? GetProgress() => Progress;
+
+    public bool AddXp(int amount)
+    {
+        if (Progress == null)
+            return false;
+        XpAwards.Add(amount);
+        return true;
+    }
+
+    public PlayerSnapshot? GetPlayer() => Player;
+
+    public IDisposable? SubscribePlayerDied(Action callback) => null;
+
+    public IDisposable? SubscribePlayerRevived(Action callback) => null;
+
+    public IDisposable SubscribeTrashRecycled(Action<int> callback) => EmptySubscription.Instance;
 
     public IDisposable CreateMapMarker(MapMarkerRequest request) => EmptySubscription.Instance;
 

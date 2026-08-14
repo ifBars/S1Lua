@@ -1,6 +1,9 @@
 using S1API.Lifecycle;
 using S1API.GameTime;
 using S1API.Weather;
+using S1API.Money;
+using S1API.Leveling;
+using S1API.Entities;
 using S1Lua.Hosting;
 using S1Lua.Model;
 using S1Lua.Scripting;
@@ -14,7 +17,14 @@ internal sealed class S1LuaCoordinator
     private readonly S1ApiItemRegistrar _items;
     private readonly Dictionary<string, S1API.Items.ItemDefinition> _registeredItems = new(StringComparer.Ordinal);
     private readonly List<IDisposable> _mapMarkers = new();
+    private IDisposable? _playerDiedSubscription;
+    private IDisposable? _playerRevivedSubscription;
+    private IDisposable? _trashRecycledSubscription;
     private bool _attached;
+    private bool _dispatchingBalanceChanged;
+    private bool _dispatchingXpChanged;
+    private bool _dispatchingRankUp;
+    private bool _playerReadyDispatched;
 
     internal S1LuaCoordinator(S1LuaEngine engine, IS1LuaHost host, S1ApiItemRegistrar items)
     {
@@ -39,6 +49,11 @@ internal sealed class S1LuaCoordinator
         TimeManager.OnSleepStart += OnSleepStarted;
         TimeManager.OnSleepEnd += OnSleepEnded;
         WeatherManager.OnWeatherChanged += OnWeatherChanged;
+        Money.OnBalanceChanged += OnBalanceChanged;
+        LevelManager.OnXPChanged += OnXpChanged;
+        LevelManager.OnRankUp += OnRankUp;
+        Player.LocalPlayerSpawned += OnLocalPlayerSpawned;
+        _trashRecycledSubscription = _host.SubscribeTrashRecycled(OnTrashRecycled);
     }
 
     internal void Detach()
@@ -59,10 +74,21 @@ internal sealed class S1LuaCoordinator
         TimeManager.OnSleepEnd -= OnSleepEnded;
 #pragma warning restore CS8601
         WeatherManager.OnWeatherChanged -= OnWeatherChanged;
+        Money.OnBalanceChanged -= OnBalanceChanged;
+        LevelManager.OnXPChanged -= OnXpChanged;
+        LevelManager.OnRankUp -= OnRankUp;
+        Player.LocalPlayerSpawned -= OnLocalPlayerSpawned;
+        _trashRecycledSubscription?.Dispose();
+        _trashRecycledSubscription = null;
         _engine.UnbindRuntimeSubscriptions();
+        _engine.CancelTimers();
+        DisposePlayerSubscriptions();
         DisposeMapMarkers();
         _registeredItems.Clear();
+        _playerReadyDispatched = false;
     }
+
+    internal void Update(double elapsedSeconds) => _engine.AdvanceTime(elapsedSeconds);
 
     private void OnPreLoad()
     {
@@ -86,6 +112,7 @@ internal sealed class S1LuaCoordinator
 
     private void OnLoadComplete()
     {
+        _ = LevelManager.Exists;
         foreach (ScriptModSession session in _engine.Mods)
         {
             foreach (ItemDeclaration declaration in session.Items)
@@ -104,14 +131,19 @@ internal sealed class S1LuaCoordinator
         }
 
         CreateMapMarkers();
+        BindPlayerSubscriptions();
         _engine.BindRuntimeSubscriptions();
+        if (Player.Local != null)
+            DispatchPlayerReady();
         _engine.Dispatch("game_loaded");
     }
 
     private void OnPreSceneChange()
     {
         _engine.Dispatch("scene_changing");
+        _playerReadyDispatched = false;
         _engine.UnbindRuntimeSubscriptions();
+        DisposePlayerSubscriptions();
         DisposeMapMarkers();
         _registeredItems.Clear();
     }
@@ -131,6 +163,85 @@ internal sealed class S1LuaCoordinator
     private void OnSleepEnded(int minutesSkipped) => _engine.Dispatch("sleep_ended", minutesSkipped);
 
     private void OnWeatherChanged(WeatherState state) => _engine.Dispatch("weather_changed");
+
+    private void OnTrashRecycled(int itemCount) => _engine.Dispatch("trash_recycled", itemCount);
+
+    private void OnBalanceChanged()
+    {
+        if (_dispatchingBalanceChanged)
+            return;
+
+        try
+        {
+            _dispatchingBalanceChanged = true;
+            _engine.Dispatch("balance_changed");
+        }
+        finally
+        {
+            _dispatchingBalanceChanged = false;
+        }
+    }
+
+    private void OnXpChanged(FullRank before, FullRank after)
+    {
+        if (_dispatchingXpChanged)
+            return;
+
+        try
+        {
+            _dispatchingXpChanged = true;
+            _engine.Dispatch("xp_changed");
+        }
+        finally
+        {
+            _dispatchingXpChanged = false;
+        }
+    }
+
+    private void OnRankUp(FullRank before, FullRank after)
+    {
+        if (_dispatchingRankUp)
+            return;
+
+        try
+        {
+            _dispatchingRankUp = true;
+            _engine.Dispatch("rank_up");
+        }
+        finally
+        {
+            _dispatchingRankUp = false;
+        }
+    }
+
+    private void OnLocalPlayerSpawned(Player player)
+    {
+        BindPlayerSubscriptions();
+        DispatchPlayerReady();
+    }
+
+    private void DispatchPlayerReady()
+    {
+        if (_playerReadyDispatched)
+            return;
+        _playerReadyDispatched = true;
+        _engine.Dispatch("player_ready");
+    }
+
+    private void BindPlayerSubscriptions()
+    {
+        DisposePlayerSubscriptions();
+        _playerDiedSubscription = _host.SubscribePlayerDied(() => _engine.Dispatch("player_died"));
+        _playerRevivedSubscription = _host.SubscribePlayerRevived(() => _engine.Dispatch("player_revived"));
+    }
+
+    private void DisposePlayerSubscriptions()
+    {
+        _playerDiedSubscription?.Dispose();
+        _playerDiedSubscription = null;
+        _playerRevivedSubscription?.Dispose();
+        _playerRevivedSubscription = null;
+    }
 
     private void CreateMapMarkers()
     {

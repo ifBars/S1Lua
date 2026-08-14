@@ -6,7 +6,7 @@ namespace S1Lua.Generated;
 
 public static class S1LuaBuild
 {
-    public const string Version = "0.2.1";
+    public const string Version = "0.3.0";
     public const string S1ApiVersion = "3.1.15";
 }
 
@@ -17,28 +17,37 @@ internal static class GeneratedSurface
 
     internal static readonly SurfaceBindingInfo[] Bindings =
     {
-        new("s1.mod", "s1.mod(options) -> mod", "Creates the single mod declared by this script."),
+        new("s1.mod", "s1.mod(options) -> mod", "Starts your mod and sets its identity and display information."),
         new("s1.log", "s1.log(message)", "Writes an informational line to the MelonLoader log."),
         new("s1.warn", "s1.warn(message)", "Writes a warning to the MelonLoader log."),
-        new("s1.time", "s1.time() -> TimeInfo|nil", "Returns the current game-time snapshot, or nil outside a loaded game."),
-        new("s1.weather", "s1.weather() -> WeatherInfo|nil", "Returns current weather weights, or nil before weather is available."),
-        new("mod.item", "mod:item(options)", "Declares a beginner-friendly S1API item without exposing builders or Unity objects."),
+        new("s1.time", "s1.time() -> TimeInfo|nil", "Returns the current in-game day and time, or nil when no save is loaded."),
+        new("s1.weather", "s1.weather() -> WeatherInfo|nil", "Returns the current weather conditions, or nil until they are available."),
+        new("s1.money", "s1.money() -> MoneyInfo", "Returns current cash, online balance, and net worth. Values are zero until balance information is available."),
+        new("s1.progress", "s1.progress() -> ProgressInfo|nil", "Returns the player's current rank and XP, or nil until this information is available."),
+        new("s1.player", "s1.player() -> PlayerInfo|nil", "Returns the local player's current status, or nil until the player has spawned."),
+        new("mod.item", "mod:item(options)", "Creates an item and optionally adds it to shops."),
         new("mod.on", "mod:on(event, callback)", "Runs a function when a supported game event occurs."),
-        new("mod.get", "mod:get(key, default) -> value", "Reads a saved string, number, or boolean for this mod."),
-        new("mod.set", "mod:set(key, value)", "Stores a string, number, boolean, or nil in this save."),
+        new("mod.require", "mod:require(path) -> value", "Loads a helper Lua file from this mod folder."),
+        new("mod.after", "mod:after(seconds, callback) -> integer", "Runs a function once after the chosen number of gameplay seconds."),
+        new("mod.every", "mod:every(seconds, callback) -> integer", "Runs a function repeatedly at the chosen interval."),
+        new("mod.cancel", "mod:cancel(timer_id) -> boolean", "Stops a delayed or repeating function created by this mod."),
+        new("mod.get", "mod:get(key, default) -> value", "Reads a value previously saved by this mod."),
+        new("mod.set", "mod:set(key, value)", "Saves a string, number, boolean, or nil in the current save file."),
         new("mod.save", "mod:save() -> boolean", "Asks the game to save now and returns whether the request was accepted."),
-        new("mod.npc", "mod:npc(id) -> Npc", "Creates a reload-safe proxy for an existing NPC ID."),
-        new("mod.marker", "mod:marker(options) -> string", "Declares a phone-map marker created after the game loads."),
-        new("mod.call", "mod:call(options) -> boolean", "Queues a simple phone call and returns false when its NPC caller is unavailable."),
-        new("mod.quest", "mod:quest(name) -> Quest", "Creates a read-only proxy for a known base-game quest title or compact ID."),
-        new("npc.info", "npc:info() -> NpcInfo|nil", "Returns a primitive NPC snapshot, or nil while that NPC is unavailable."),
+        new("mod.change_cash", "mod:change_cash(amount, visualize?, sound?)", "Adds or removes carried cash after the game is loaded."),
+        new("mod.add_xp", "mod:add_xp(amount) -> boolean", "Adds XP and returns true when successful. In multiplayer, only the lobby host can add XP."),
+        new("mod.npc", "mod:npc(id) -> Npc", "Finds an NPC by ID and provides functions for working with them."),
+        new("mod.marker", "mod:marker(options) -> string", "Creates a phone map marker after the save finishes loading."),
+        new("mod.call", "mod:call(options) -> boolean", "Starts a simple phone call. Returns false when the chosen NPC is unavailable."),
+        new("mod.quest", "mod:quest(name) -> Quest", "Finds a base-game quest by title or ID so you can read its details and events."),
+        new("npc.info", "npc:info() -> NpcInfo|nil", "Returns the NPC's current details, or nil when that NPC is unavailable."),
         new("npc.say", "npc:say(text, seconds) -> boolean", "Shows temporary world-space text above the NPC."),
-        new("npc.text", "npc:text(message) -> boolean", "Sends a networked phone message from the NPC."),
-        new("npc.add_relationship", "npc:add_relationship(amount) -> boolean", "Adds a networked relationship delta from -5 to 5."),
-        new("npc.unlock", "npc:unlock() -> boolean", "Unlocks the NPC using S1API's direct-approach default."),
-        new("npc.on", "npc:on(event, callback)", "Listens for relationship_changed, unlocked, or died and rebinds after loads."),
-        new("quest.info", "quest:info() -> QuestInfo|nil", "Returns a primitive quest snapshot, or nil before the quest is available."),
-        new("quest.on", "quest:on(event, callback)", "Listens for completed or failed and rebinds after loads."),
+        new("npc.text", "npc:text(message) -> boolean", "Sends the player a phone message from the NPC."),
+        new("npc.add_relationship", "npc:add_relationship(amount) -> boolean", "Changes the NPC's relationship by an amount from -5 to 5."),
+        new("npc.unlock", "npc:unlock() -> boolean", "Unlocks the NPC as though the player met them directly."),
+        new("npc.on", "npc:on(event, callback)", "Runs a function when the NPC's relationship changes, they are unlocked, or they die."),
+        new("quest.info", "quest:info() -> QuestInfo|nil", "Returns the quest's current details, or nil when the quest is unavailable."),
+        new("quest.on", "quest:on(event, callback)", "Runs a function when the quest is completed or failed."),
     };
 
     internal static void RegisterGlobals(Script script, BeginnerApiBindings bindings)
@@ -49,6 +58,9 @@ internal static class GeneratedSurface
         api.Set("warn", DynValue.NewCallback(bindings.Warn));
         api.Set("time", DynValue.NewCallback(bindings.GetTime));
         api.Set("weather", DynValue.NewCallback(bindings.GetWeather));
+        api.Set("money", DynValue.NewCallback(bindings.GetMoney));
+        api.Set("progress", DynValue.NewCallback(bindings.GetProgress));
+        api.Set("player", DynValue.NewCallback(bindings.GetPlayer));
         script.Globals.Set("s1", DynValue.NewTable(api));
     }
 
@@ -56,9 +68,15 @@ internal static class GeneratedSurface
     {
         table.Set("item", DynValue.NewCallback((context, args) => bindings.DeclareItem(session, context, args)));
         table.Set("on", DynValue.NewCallback((context, args) => bindings.Subscribe(session, context, args)));
+        table.Set("require", DynValue.NewCallback((context, args) => bindings.RequireModule(session, context, args)));
+        table.Set("after", DynValue.NewCallback((context, args) => bindings.ScheduleAfter(session, context, args)));
+        table.Set("every", DynValue.NewCallback((context, args) => bindings.ScheduleEvery(session, context, args)));
+        table.Set("cancel", DynValue.NewCallback((context, args) => bindings.CancelTimer(session, context, args)));
         table.Set("get", DynValue.NewCallback((context, args) => bindings.GetState(session, context, args)));
         table.Set("set", DynValue.NewCallback((context, args) => bindings.SetState(session, context, args)));
         table.Set("save", DynValue.NewCallback((context, args) => bindings.RequestSave(session, context, args)));
+        table.Set("change_cash", DynValue.NewCallback((context, args) => bindings.ChangeCash(session, context, args)));
+        table.Set("add_xp", DynValue.NewCallback((context, args) => bindings.AddXp(session, context, args)));
         table.Set("npc", DynValue.NewCallback((context, args) => bindings.CreateNpcProxy(session, context, args)));
         table.Set("marker", DynValue.NewCallback((context, args) => bindings.DeclareMarker(session, context, args)));
         table.Set("call", DynValue.NewCallback((context, args) => bindings.QueuePhoneCall(session, context, args)));
@@ -96,6 +114,13 @@ internal static class GeneratedSurface
             "sleep_started" => true,
             "sleep_ended" => true,
             "weather_changed" => true,
+            "balance_changed" => true,
+            "xp_changed" => true,
+            "rank_up" => true,
+            "player_ready" => true,
+            "player_died" => true,
+            "player_revived" => true,
+            "trash_recycled" => true,
             _ => false
         };
     }

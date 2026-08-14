@@ -2,6 +2,14 @@
 
 Start with the first S1Lua error in the MelonLoader console. Later messages are often consequences of that first failure.
 
+## Two-minute checklist
+
+1. Confirm S1API loads before S1Lua and both use the same runtime.
+2. Confirm the script path is exactly `Mods/S1Lua/<YourMod>/mod.lua`.
+3. Confirm your copied mod folder does not begin with `_` and Windows did not name the file `mod.lua.txt`.
+4. Restart the game after every script change; S1Lua does not hot reload.
+5. Fix the first S1Lua error before investigating later messages.
+
 ## Installation problems
 
 If no S1Lua message appears, return to [Installation](installation.md) and check the archive layout and runtime match. S1Lua cannot start if its files are nested one folder too deep or if Mono and IL2CPP builds are mixed.
@@ -15,6 +23,7 @@ If no S1Lua message appears, return to [Installation](installation.md) and check
 | `clone source was not found` | The base-game item ID is invalid. | Correct the `clone` value. |
 | `ran for more than 1 second` | Startup code or a callback exceeded its execution budget, often because a loop never ends. | Remove the endless loop or shorten the work performed by the callback. |
 | `icon path must stay inside` | The icon points outside the mod folder or is not a PNG. | Place the PNG beside the mod and use a relative path. |
+| `Loaded 0 S1Lua mod(s)` | S1Lua works but found no enabled `mod.lua` entry file. | Copy `_StarterMod` to a folder without a leading underscore, then check the folder depth and file extension. |
 
 ## Isolate a broken script
 

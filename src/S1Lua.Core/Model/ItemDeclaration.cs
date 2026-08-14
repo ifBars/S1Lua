@@ -13,6 +13,15 @@ public sealed record ShopSelection(ShopSelectionKind Kind, IReadOnlyList<string>
     public static ShopSelection Compatible { get; } = new(ShopSelectionKind.Compatible, Array.Empty<string>());
 }
 
+public sealed record ClothingDeclaration(
+    string? Slot,
+    string? Application,
+    string? Asset,
+    string? Texture,
+    bool? Colorable,
+    string? DefaultColor,
+    IReadOnlyList<string> BlockedSlots);
+
 public sealed record ItemDeclaration(
     string ModId,
     string LocalId,
@@ -27,4 +36,5 @@ public sealed record ItemDeclaration(
     double? ResellMultiplier,
     bool? Legal,
     string? Icon,
+    ClothingDeclaration? Clothing,
     ShopSelection Shops);

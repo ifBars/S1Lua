@@ -40,4 +40,9 @@ public sealed class S1LuaMod : MelonMod
         _coordinator?.Detach();
         _coordinator = null;
     }
+
+    public override void OnUpdate()
+    {
+        _coordinator?.Update(UnityEngine.Time.deltaTime);
+    }
 }

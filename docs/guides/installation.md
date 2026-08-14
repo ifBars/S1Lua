@@ -1,51 +1,72 @@
-# Installation
+---
+title: Install S1Lua
+description: Match your S1API runtime, extract one archive, and verify S1Lua in the MelonLoader console.
+---
 
-S1Lua runs on top of MelonLoader and S1API. Install the build that matches your game and S1API runtime; Mono and IL2CPP files cannot be mixed.
+# Install S1Lua
 
-## Before you install
+The goal is simple: extract the matching release archive into the game folder and see S1Lua report that it loaded. You do not need Visual Studio, Unity, or a compiler.
+
+## 1. Match your S1API runtime
+
+S1Lua runs on top of MelonLoader and S1API. Its runtime label must match the S1API build you already installed.
+
+| Your S1API download says | Download from S1Lua |
+| --- | --- |
+| `Mono` | the archive ending in `Mono.zip` |
+| `Il2Cpp` | the archive ending in `Il2Cpp.zip` |
+
+> [!IMPORTANT]
+> Do not guess or mix runtimes. If you are unsure, check the filename of the S1API archive or DLL you installed before downloading S1Lua.
 
 You need:
 
 - Schedule I with MelonLoader installed;
-- the current S1API release for the same runtime;
-- the matching S1Lua release archive: `Mono` or `Il2Cpp`.
+- the current S1API release;
+- the matching archive from the [S1Lua releases page](https://github.com/ifBars/S1Lua/releases).
 
-If you are unsure which runtime you use, check the S1API archive you installed. Choose the S1Lua archive with the same runtime label.
+## 2. Extract the archive
 
-## Install S1Lua
-
-1. Download the matching archive from the [S1Lua releases page](https://github.com/ifBars/S1Lua/releases).
-2. Open the Schedule I game folder.
-3. Extract the archive directly into that folder. Allow it to merge the included `Mods` and `UserLibs` folders.
+1. Open the Schedule I game folder.
+2. Extract the S1Lua archive directly into that folder.
+3. Allow your archive tool to merge the included `Mods` and `UserLibs` folders.
 4. Start the game and wait for the MelonLoader console.
 
-The installed files are:
+The result should look like this:
 
 ```text
 Schedule I/
 ├── Mods/
 │   ├── S1Lua.dll
 │   └── S1Lua/
-│       └── MyFirstMod/
-│           └── mod.lua.example
+│       ├── .luarc.json
+│       ├── Editor/
+│       │   └── s1lua.lua
+│       └── _StarterMod/
+│           └── mod.lua
 ├── UserLibs/
 │   ├── S1Lua.Core.dll
 │   └── MoonSharp.Interpreter.dll
-└── Editor/
-    └── s1lua.lua
 ```
 
-The `Editor` file is optional autocomplete metadata. It is not loaded by the game.
+The game ignores `Mods/S1Lua/Editor/s1lua.lua`. Your editor uses it to provide S1Lua autocomplete and early error checking.
 
-## Verify the installation
+## 3. Confirm S1Lua loaded
 
-A successful startup prints an S1Lua message in the MelonLoader console. Seeing `No Lua mods found` is also a successful result: S1Lua loaded and is waiting for a script under `Mods/S1Lua`.
+Look for both of these messages or their matching versioned prefixes:
 
-If S1Lua does not appear in the console, verify that:
+```text
+Loaded 0 S1Lua mod(s)
+No Lua mods found
+```
 
-- `S1Lua.dll` is directly inside `Mods`, not inside an extra extracted folder;
-- both S1Lua support DLLs are directly inside `UserLibs`;
-- S1Lua and S1API use the same runtime;
-- MelonLoader and S1API load without errors first.
+Those messages mean installation succeeded. Folders beginning with `_` are templates and are ignored. S1Lua is waiting for a file named `mod.lua` under a folder such as `Mods/S1Lua/MyFirstMod`.
 
-Next, follow the [Quickstart](getting-started.md) to create your first mod.
+If S1Lua never appears in the console, check that:
+
+- `S1Lua.dll` is directly inside `Mods`, not inside an extra archive folder;
+- `S1Lua.Core.dll` and `MoonSharp.Interpreter.dll` are directly inside `UserLibs`;
+- S1Lua and S1API have the same runtime label;
+- MelonLoader and S1API load without errors before S1Lua.
+
+Continue with [Your first mod](getting-started.md). The fastest path is already installed: open `Mods/S1Lua` in your editor and copy `_StarterMod` to `MyFirstMod`.

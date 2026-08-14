@@ -1,58 +1,79 @@
-# Quickstart
+---
+title: Your first S1Lua mod
+description: Enable the included starter, change one item, and verify it in Schedule I.
+---
 
-Your first S1Lua mod is one folder containing one file. You do not need Visual Studio, a compiler, or a Unity project.
+# Your first S1Lua mod
 
-Before continuing, [install S1Lua](installation.md) and start the game once. If the MelonLoader console reports that no Lua mods were found, the installation is working and waiting for your first script.
+In a few minutes you will load a Lua script, see its message in the MelonLoader console, and register a custom shop item. No C# project or Unity setup is required.
 
-## 1. Create the folder
+Before continuing, [install S1Lua](installation.md) and start the game once. Seeing `No Lua mods found` means the installation is ready.
 
-Inside the game folder, create:
+## 1. Open the authoring workspace
+
+Open this folder in your code editor:
 
 ```text
-Mods/
-└── S1Lua/
-    └── MyFirstMod/
-        └── mod.lua
+Mods/S1Lua
 ```
 
-The entry file must be named exactly `mod.lua`. S1Lua intentionally loads only one level of mod folders, so one broken script cannot silently replace another.
+For Visual Studio Code, accept the recommended Lua extension. S1Lua already includes autocomplete and error checking for every supported function and option.
 
-## 2. Paste a complete first mod
+See [Editor setup and early error checking](editor-setup.md) for other editors and how to confirm LuaLS is active.
+
+## 2. Copy the included starter
+
+Copy `_StarterMod` and name the copy `MyFirstMod`. Do not edit the original template.
+
+> [!TIP]
+> A folder beginning with `_` is ignored by S1Lua. Your copied folder must not begin with an underscore.
+
+If the template is missing, create `MyFirstMod/mod.lua` and copy the complete starter below.
+
+[!code-lua[](../../examples/MyFirstMod/mod.lua)]
+
+## 3. Make the mod yours
+
+Open `mod.lua` in any text editor and change these values:
 
 ```lua
-local mod = s1.mod {
-    id = "yourname.golden-cuke",
-    name = "Golden Cuke",
-    version = "1.0.0",
-    author = "Your Name"
-}
-
-mod:item {
-    id = "golden_cuke",
-    clone = "cuke",
-    name = "Golden Cuke",
-    description = "A suspiciously expensive energy drink.",
-    price = 250,
-    stack = 10,
-    shops = "compatible"
-}
-
-mod:on("game_loaded", function()
-    local times_loaded = mod:get("times_loaded", 0) + 1
-    mod:set("times_loaded", times_loaded)
-    s1.log("This save has loaded " .. times_loaded .. " time(s).")
-end)
+id = "yourname.my-first-mod",
+name = "My First Mod",
+author = "Your Name"
 ```
 
-Save the file and start the game. S1Lua reports the script name and any mistake with a readable message in the MelonLoader console.
+The mod `id` is permanent identity, not display text. Use lowercase letters, numbers, dots, underscores, or hyphens. Keep it stable after a save or another mod depends on it.
 
-## 3. Change one thing at a time
+Before starting the game, look at your editor's Problems panel. Fix red syntax or type errors first.
 
-Try changing `name`, `description`, `price`, or `stack`. Restart the game after editing the script. S1Lua does not hot reload scripts; the predictable restart cycle avoids half-applied game state.
+## 4. Start the game
 
-The `id` values are permanent identity, not display text. Keep them lowercase and do not change them after other content or saves depend on them. S1Lua prefixes the item ID, so the example becomes `yourname.golden-cuke:golden_cuke` and will not collide with another author's item.
+Restart Schedule I after saving the file. S1Lua intentionally does not hot reload scripts.
 
-## Add an icon
+Look for these parts in the MelonLoader console:
+
+```text
+My First Mod is ready!
+Loaded 1 S1Lua mod(s)
+```
+
+If the script has a mistake, S1Lua reports the mod name and a readable error. Start with the first S1Lua error, fix it, and restart the game.
+
+## 5. Change one visible thing
+
+The starter creates a `Golden Cuke` by cloning the base-game `cuke` item. Change one field inside `mod:item { ... }`:
+
+```lua
+name = "Golden Cuke Deluxe",
+price = 500,
+stack = 20,
+```
+
+Restart the game and check a shop that already sells this kind of item.
+
+S1Lua prefixes the item ID with your mod ID. `golden_cuke` becomes `yourname.my-first-mod:golden_cuke`, preventing collisions with other authors.
+
+## 6. Add an icon when you are ready
 
 Place a PNG beside `mod.lua`:
 
@@ -68,22 +89,12 @@ Then add this field inside `mod:item`:
 icon = "golden-cuke.png"
 ```
 
-Icon paths must remain inside the mod folder and must point to PNG files. S1Lua passes the file through S1API's image utility; scripts never receive the Unity sprite.
+Icon paths must stay inside the mod folder and point to PNG files.
 
-## Choose shops
+## Where to go next
 
-Use `shops = "compatible"` to let S1API choose shops that accept the item. To name shops explicitly, use a Lua list:
+- Copy a working bonus or status mod from [Copyable recipes](recipes.md).
+- Find every supported field and event in the [Lua API reference](../api/reference.md).
+- Use [Troubleshooting](troubleshooting.md) if the console reports an error.
 
-```lua
-shops = { "Gas-Mart", "Hardware Store" }
-```
-
-If an in-game shop name is wrong, S1Lua logs the registration error without stopping other Lua mods.
-
-If the mod does not load, start with [Troubleshooting](troubleshooting.md).
-
-## Editor autocomplete (optional)
-
-The release archive includes `Editor/s1lua.lua`. Configure Lua Language Server to use that file as a library to get descriptions and completion for every supported S1Lua field. Repository contributors can open this repo directly; the [repository's `.luarc.json`](https://github.com/ifBars/S1Lua/blob/main/.luarc.json) already points at the generated stub.
-
-Continue with the generated [Lua API reference](../api/reference.md) when you want to see every available option.
+Keep opening `Mods/S1Lua` as the workspace root so every mod gets S1Lua autocomplete and error checking.

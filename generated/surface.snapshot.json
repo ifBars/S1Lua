@@ -1,17 +1,23 @@
 {
-  "surfaceVersion": "0.2.1",
+  "surfaceVersion": "0.3.0",
   "s1ApiVersion": "3.1.15",
-  "bindingCount": 22,
-  "eventCount": 11,
-  "referencedUidFingerprint": "122156528a39b49c1a6814125f63a2c3548130266f2151578e5a84fdc82bc233",
+  "bindingCount": 31,
+  "eventCount": 18,
+  "referencedUidFingerprint": "d26a251a7047f9f8fe952fb93c8812c9ea865a32df7d4c91efe07f91984db17d",
   "bindings": [
+    "mod.add_xp",
+    "mod.after",
     "mod.call",
+    "mod.cancel",
+    "mod.change_cash",
+    "mod.every",
     "mod.get",
     "mod.item",
     "mod.marker",
     "mod.npc",
     "mod.on",
     "mod.quest",
+    "mod.require",
     "mod.save",
     "mod.set",
     "npc.add_relationship",
@@ -24,22 +30,116 @@
     "quest.on",
     "s1.log",
     "s1.mod",
+    "s1.money",
+    "s1.player",
+    "s1.progress",
     "s1.time",
     "s1.warn",
     "s1.weather"
   ],
   "events": [
     "after_save",
+    "balance_changed",
     "before_save",
     "day_passed",
     "game_loaded",
     "game_loading",
     "hour_passed",
+    "player_died",
+    "player_ready",
+    "player_revived",
+    "rank_up",
     "scene_changing",
     "sleep_ended",
     "sleep_started",
+    "trash_recycled",
     "weather_changed",
-    "week_passed"
+    "week_passed",
+    "xp_changed"
+  ],
+  "eventSignatures": [
+    {
+      "Name": "after_save",
+      "parameters": []
+    },
+    {
+      "Name": "balance_changed",
+      "parameters": []
+    },
+    {
+      "Name": "before_save",
+      "parameters": []
+    },
+    {
+      "Name": "day_passed",
+      "parameters": []
+    },
+    {
+      "Name": "game_loaded",
+      "parameters": []
+    },
+    {
+      "Name": "game_loading",
+      "parameters": []
+    },
+    {
+      "Name": "hour_passed",
+      "parameters": []
+    },
+    {
+      "Name": "player_died",
+      "parameters": []
+    },
+    {
+      "Name": "player_ready",
+      "parameters": []
+    },
+    {
+      "Name": "player_revived",
+      "parameters": []
+    },
+    {
+      "Name": "rank_up",
+      "parameters": []
+    },
+    {
+      "Name": "scene_changing",
+      "parameters": []
+    },
+    {
+      "Name": "sleep_ended",
+      "parameters": [
+        {
+          "Name": "minutes_skipped",
+          "Type": "integer"
+        }
+      ]
+    },
+    {
+      "Name": "sleep_started",
+      "parameters": []
+    },
+    {
+      "Name": "trash_recycled",
+      "parameters": [
+        {
+          "Name": "item_count",
+          "Type": "integer"
+        }
+      ]
+    },
+    {
+      "Name": "weather_changed",
+      "parameters": []
+    },
+    {
+      "Name": "week_passed",
+      "parameters": []
+    },
+    {
+      "Name": "xp_changed",
+      "parameters": []
+    }
   ],
   "referencedUids": [
     "S1API.Entities.NPC.FullName",
@@ -56,6 +156,19 @@
     "S1API.Entities.NPCRelationship.OnChanged",
     "S1API.Entities.NPCRelationship.OnUnlocked",
     "S1API.Entities.NPCRelationship.Unlock(S1API.Entities.NPCRelationship.UnlockType,System.Boolean)",
+    "S1API.Entities.Player.CurrentHealth",
+    "S1API.Entities.Player.CurrentRegion",
+    "S1API.Entities.Player.IsArrested",
+    "S1API.Entities.Player.IsDead",
+    "S1API.Entities.Player.IsInVehicle",
+    "S1API.Entities.Player.IsSleeping",
+    "S1API.Entities.Player.Local",
+    "S1API.Entities.Player.LocalPlayerSpawned",
+    "S1API.Entities.Player.MaxHealth",
+    "S1API.Entities.Player.Name",
+    "S1API.Entities.Player.OnDeath",
+    "S1API.Entities.Player.OnRevive",
+    "S1API.Entities.Player.Position",
     "S1API.GameTime.TimeManager.CurrentDay",
     "S1API.GameTime.TimeManager.CurrentTime",
     "S1API.GameTime.TimeManager.ElapsedDays",
@@ -69,6 +182,15 @@
     "S1API.GameTime.TimeManager.SleepInProgress",
     "S1API.Internal.Abstraction.Saveable",
     "S1API.Internal.Abstraction.Saveable.RequestGameSave",
+    "S1API.Items.Clothing.ClothingItemCreator.CloneFrom(S1API.Items.Clothing.ClothingItemDefinition)",
+    "S1API.Items.Clothing.ClothingItemCreator.CreateBuilder",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.Build",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithApplicationType(S1API.Items.Clothing.ClothingApplicationType)",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithBlockedSlots(S1API.Items.Clothing.ClothingSlot[])",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithClothingAsset(System.String)",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithColorable(System.Boolean)",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithDefaultColor(S1API.Items.Clothing.ClothingColor)",
+    "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithSlot(S1API.Items.Clothing.ClothingSlot)",
     "S1API.Items.ItemManager.GetDefinition(System.String)",
     "S1API.Items.Storable.ItemCreator.CloneFrom(System.String)",
     "S1API.Items.Storable.ItemCreator.CreateBuilder",
@@ -77,6 +199,15 @@
     "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithLegalStatus(S1API.Items.LegalStatus)",
     "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithPricing(System.Single,System.Single)",
     "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithStackLimit(System.Int32)",
+    "S1API.Leveling.LevelManager.AddXP(System.Int32)",
+    "S1API.Leveling.LevelManager.Exists",
+    "S1API.Leveling.LevelManager.OnRankUp",
+    "S1API.Leveling.LevelManager.OnXPChanged",
+    "S1API.Leveling.LevelManager.Rank",
+    "S1API.Leveling.LevelManager.Tier",
+    "S1API.Leveling.LevelManager.TotalXP",
+    "S1API.Leveling.LevelManager.XP",
+    "S1API.Leveling.LevelManager.XPToNextTier",
     "S1API.Lifecycle.GameLifecycle.OnLoadComplete",
     "S1API.Lifecycle.GameLifecycle.OnPreLoad",
     "S1API.Lifecycle.GameLifecycle.OnPreSceneChange",
@@ -90,6 +221,11 @@
     "S1API.Map.MapPOIBuilder.WithTarget(UnityEngine.Transform)",
     "S1API.Map.MapPOIBuilder.WithTextVisibility(S1API.Map.MapPOITextVisibility)",
     "S1API.Map.MapPOIBuilder.WithVisibility(System.Boolean)",
+    "S1API.Money.Money.ChangeCashBalance(System.Single,System.Boolean,System.Boolean)",
+    "S1API.Money.Money.GetCashBalance",
+    "S1API.Money.Money.GetNetWorth",
+    "S1API.Money.Money.GetOnlineBalance",
+    "S1API.Money.Money.OnBalanceChanged",
     "S1API.PhoneCalls.CallManager.QueueCall(S1API.PhoneCalls.PhoneCallDefinition)",
     "S1API.PhoneCalls.PhoneCallDefinition.#ctor(S1API.Entities.NPC)",
     "S1API.PhoneCalls.PhoneCallDefinition.#ctor(System.String,UnityEngine.Sprite)",
@@ -98,9 +234,13 @@
     "S1API.Quests.QuestWrapper.OnComplete",
     "S1API.Quests.QuestWrapper.OnFail",
     "S1API.Quests.QuestWrapper.Title",
+    "S1API.Rendering.AccessoryFactory.CreateAndRegisterAccessory(System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,UnityEngine.Texture2D},System.Nullable{UnityEngine.Color})",
+    "S1API.Rendering.AvatarLayerFactory.CreateAndRegisterAvatarLayer(System.String,System.String,System.String,UnityEngine.Texture2D)",
+    "S1API.Rendering.TextureUtils.LoadTextureFromFile(System.String,UnityEngine.FilterMode,UnityEngine.TextureWrapMode)",
     "S1API.Saveables.SaveableField.#ctor(System.String)",
     "S1API.Shops.ShopManager.AddToCompatibleShops(S1API.Items.ItemDefinition,System.Nullable{System.Single})",
     "S1API.Shops.ShopManager.AddToShops(S1API.Items.ItemDefinition,System.String[])",
+    "S1API.Utils.EventHelper.AddListener(System.Action,UnityEngine.Events.UnityEvent)",
     "S1API.Utils.ImageUtils.LoadImage(System.String)",
     "S1API.Weather.WeatherManager.Current",
     "S1API.Weather.WeatherManager.OnWeatherChanged"

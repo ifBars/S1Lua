@@ -7,6 +7,10 @@ public sealed class ExampleScriptTests
     [Theory]
     [InlineData("examples/MyFirstMod/mod.lua")]
     [InlineData("examples/GoldenCuke/mod.lua")]
+    [InlineData("examples/StatusWatcher/mod.lua")]
+    [InlineData("examples/WelcomeBonus/mod.lua")]
+    [InlineData("examples/RecycleForXp/mod.lua")]
+    [InlineData("examples/ModularTimer/mod.lua")]
     public void ShippedBeginnerScriptsLoadAndDispatch(string relativePath)
     {
         string repositoryRoot = FindRepositoryRoot();
@@ -16,9 +20,28 @@ public sealed class ExampleScriptTests
 
         ScriptLoadResult result = engine.LoadScript(File.ReadAllText(scriptPath), scriptPath);
         engine.Dispatch("game_loaded");
+        engine.AdvanceTime(1);
 
         Assert.True(result.Success, result.Error);
         Assert.DoesNotContain(host.Messages, message => message.Level == S1Lua.Hosting.S1LuaLogLevel.Error);
+    }
+
+    [Fact]
+    public void RecycleForXpAwardsFiveXpPerTrashObject()
+    {
+        string repositoryRoot = FindRepositoryRoot();
+        string scriptPath = Path.Combine(repositoryRoot, "examples", "RecycleForXp", "mod.lua");
+        var host = new TestHost
+        {
+            Progress = new S1Lua.Hosting.ProgressSnapshot("street_rat", 1, 0, 0, 100)
+        };
+        var engine = new S1LuaEngine(host);
+
+        ScriptLoadResult result = engine.LoadScript(File.ReadAllText(scriptPath), scriptPath);
+        engine.Dispatch("trash_recycled", 4);
+
+        Assert.True(result.Success, result.Error);
+        Assert.Equal(20, Assert.Single(host.XpAwards));
     }
 
     private static string FindRepositoryRoot()

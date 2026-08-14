@@ -46,6 +46,7 @@ public sealed class EventDefinition
 {
     public string Name { get; init; } = string.Empty;
     public string Summary { get; init; } = string.Empty;
+    public IReadOnlyList<FieldDefinition> Parameters { get; init; } = Array.Empty<FieldDefinition>();
     public string S1ApiUid { get; init; } = string.Empty;
 }
 

@@ -53,6 +53,31 @@ public sealed record WeatherSnapshot(
     }
 }
 
+public sealed record MoneySnapshot(
+    double Cash,
+    double Online,
+    double NetWorth);
+
+public sealed record ProgressSnapshot(
+    string Rank,
+    int Tier,
+    int Xp,
+    int TotalXp,
+    double XpToNextTier);
+
+public sealed record PositionSnapshot(double X, double Y, double Z);
+
+public sealed record PlayerSnapshot(
+    string Name,
+    double Health,
+    double MaxHealth,
+    bool IsDead,
+    bool IsInVehicle,
+    bool IsSleeping,
+    bool IsArrested,
+    string Region,
+    PositionSnapshot? Position = null);
+
 public sealed record QuestSnapshot(string Id, string Title);
 
 public sealed record MapMarkerRequest(

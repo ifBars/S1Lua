@@ -1,37 +1,38 @@
 ---
 title: S1Lua documentation
-description: Make Schedule I mods with small, approachable Lua scripts powered by S1API.
+description: Make Schedule I mods with small, approachable Lua scripts.
 _layout: landing
 ---
 
 <section class="s1lua-hero">
   <p class="s1lua-eyebrow">Schedule I modding, without the framework ceremony</p>
   <h1>Change the game with one Lua file.</h1>
-  <p class="s1lua-lead">S1Lua turns a focused, beginner-friendly Lua API into safe S1API calls. Create an item, react to the game world, or make an NPC send a message without setting up a C# project.</p>
+  <p class="s1lua-lead">Create an item, react to the game world, or make an NPC send a message with a small Lua script. No C# project is required.</p>
   <div class="s1lua-actions">
-    <a class="s1lua-action s1lua-action-primary" href="guides/getting-started.md">Make your first mod</a>
-    <a class="s1lua-action" href="api/reference.md">Browse the Lua API</a>
+    <a class="s1lua-action s1lua-action-primary" href="guides/installation.md">Install S1Lua</a>
+    <a class="s1lua-action" href="guides/getting-started.md">Make your first mod</a>
+    <a class="s1lua-action" href="guides/recipes.md">Copy a recipe</a>
   </div>
 </section>
 
 <section class="s1lua-section" aria-labelledby="what-you-can-make">
   <p class="s1lua-kicker">A deliberately small surface</p>
-  <h2 id="what-you-can-make">Start with useful changes, not engine internals.</h2>
+  <h2 id="what-you-can-make">Start with changes you can see in the game.</h2>
   <div class="s1lua-grid">
     <a class="s1lua-card" href="guides/getting-started.md">
       <span class="s1lua-card-number">01</span>
       <h3>Create items</h3>
       <p>Clone a base-game item, change its presentation and pricing, then place it in compatible or named shops.</p>
     </a>
-    <a class="s1lua-card" href="api/reference.md#events">
+    <a class="s1lua-card" href="guides/recipes.md">
       <span class="s1lua-card-number">02</span>
-      <h3>React to the world</h3>
-      <p>Run Lua callbacks when saves load, time passes, sleep ends, weather changes, or the game saves.</p>
+      <h3>Read game state</h3>
+      <p>Inspect time, weather, balances, progression, and local-player status using plain Lua values.</p>
     </a>
-    <a class="s1lua-card" href="api/reference.md#npcinfo">
+    <a class="s1lua-card" href="api/reference.md#events">
       <span class="s1lua-card-number">03</span>
-      <h3>Work with people</h3>
-      <p>Read NPC state, show dialogue, send texts, adjust relationships, and listen for NPC or quest events.</p>
+      <h3>React to events</h3>
+      <p>React to player, NPC, quest, save, time, weather, money, and progression events without managing game objects.</p>
     </a>
   </div>
 </section>
@@ -40,7 +41,7 @@ _layout: landing
   <div>
     <p class="s1lua-kicker">One folder. One script.</p>
     <h2 id="one-file-example">Readable before you know Lua.</h2>
-    <p>Each mod lives in its own folder under <code>Mods/S1Lua</code>. S1Lua handles registration timing, runtime differences, and namespacing behind the scenes.</p>
+    <p>Each mod lives in its own folder under <code>Mods/S1Lua</code>. S1Lua loads it at the right time and keeps its IDs and saved data separate.</p>
   </div>
 
 ```lua
@@ -64,5 +65,5 @@ mod:item {
     <p class="s1lua-kicker">Ready when you are</p>
     <h2>Build the smallest mod that makes you smile.</h2>
   </div>
-  <a class="s1lua-action s1lua-action-primary" href="guides/getting-started.md">Open the walkthrough</a>
+  <a class="s1lua-action s1lua-action-primary" href="guides/getting-started.md">Start the five-minute walkthrough</a>
 </section>

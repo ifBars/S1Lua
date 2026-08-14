@@ -37,6 +37,22 @@ public interface IS1LuaHost
 
     WeatherSnapshot? GetWeather();
 
+    MoneySnapshot GetMoney();
+
+    void ChangeCash(double amount, bool visualizeChange, bool playCashSound);
+
+    ProgressSnapshot? GetProgress();
+
+    bool AddXp(int amount);
+
+    PlayerSnapshot? GetPlayer();
+
+    IDisposable? SubscribePlayerDied(Action callback);
+
+    IDisposable? SubscribePlayerRevived(Action callback);
+
+    IDisposable SubscribeTrashRecycled(Action<int> callback);
+
     IDisposable CreateMapMarker(MapMarkerRequest request);
 
     bool QueuePhoneCall(PhoneCallRequest request);

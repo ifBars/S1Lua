@@ -66,6 +66,10 @@ public sealed class S1LuaEngine
         var results = new List<ScriptLoadResult>();
         foreach (string directory in Directory.EnumerateDirectories(root).OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
         {
+            string folderName = Path.GetFileName(directory);
+            if (folderName.StartsWith("_", StringComparison.Ordinal))
+                continue;
+
             string entryPoint = Path.Combine(directory, "mod.lua");
             if (!File.Exists(entryPoint))
                 continue;
@@ -77,7 +81,7 @@ public sealed class S1LuaEngine
             catch (Exception ex)
             {
                 string error = $"Could not read {entryPoint}: {ex.Message}";
-                _host.Log(S1LuaLogLevel.Error, Path.GetFileName(directory), error);
+                _host.Log(S1LuaLogLevel.Error, folderName, error);
                 results.Add(ScriptLoadResult.Failed(error));
             }
         }
@@ -88,6 +92,23 @@ public sealed class S1LuaEngine
     {
         foreach (ScriptModSession session in _mods.Values.ToArray())
             session.Dispatch(eventName, arguments.Select(ToDynValue).ToArray());
+    }
+
+    public void AdvanceTime(double elapsedSeconds)
+    {
+        if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) || elapsedSeconds < 0)
+            throw new ArgumentOutOfRangeException(nameof(elapsedSeconds), "Elapsed time must be a finite non-negative number.");
+        if (elapsedSeconds == 0)
+            return;
+
+        foreach (ScriptModSession session in _mods.Values.ToArray())
+            session.AdvanceTimers(elapsedSeconds);
+    }
+
+    public void CancelTimers()
+    {
+        foreach (ScriptModSession session in _mods.Values.ToArray())
+            session.CancelAllTimers();
     }
 
     public void BindRuntimeSubscriptions()

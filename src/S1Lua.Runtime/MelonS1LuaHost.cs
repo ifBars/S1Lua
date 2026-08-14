@@ -9,8 +9,12 @@ internal sealed class MelonS1LuaHost : IS1LuaHost
 {
     private readonly MelonLogger.Instance _logger;
     private readonly S1ApiMapMarkerService _mapMarkers = new();
+    private readonly S1ApiMoneyService _money = new();
     private readonly S1ApiNpcService _npcs = new();
     private readonly S1ApiPhoneCallService _phoneCalls = new();
+    private readonly S1ApiPlayerService _player = new();
+    private readonly S1ApiProgressionService _progression = new();
+    private readonly S1ApiRecyclingService _recycling = new();
     private readonly S1ApiQuestService _quests = new();
     private readonly S1ApiWorldService _world = new();
 
@@ -67,6 +71,23 @@ internal sealed class MelonS1LuaHost : IS1LuaHost
     public GameTimeSnapshot? GetGameTime() => _world.GetTime();
 
     public WeatherSnapshot? GetWeather() => _world.GetWeather();
+
+    public MoneySnapshot GetMoney() => _money.Get();
+
+    public void ChangeCash(double amount, bool visualizeChange, bool playCashSound) =>
+        _money.ChangeCash(amount, visualizeChange, playCashSound);
+
+    public ProgressSnapshot? GetProgress() => _progression.Get();
+
+    public bool AddXp(int amount) => _progression.AddXp(amount);
+
+    public PlayerSnapshot? GetPlayer() => _player.Get();
+
+    public IDisposable? SubscribePlayerDied(Action callback) => _player.SubscribeDied(callback);
+
+    public IDisposable? SubscribePlayerRevived(Action callback) => _player.SubscribeRevived(callback);
+
+    public IDisposable SubscribeTrashRecycled(Action<int> callback) => _recycling.Subscribe(callback);
 
     public IDisposable CreateMapMarker(MapMarkerRequest request) => _mapMarkers.Create(request);
 

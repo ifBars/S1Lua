@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "surfaceVersion": "0.2.1",
+  "surfaceVersion": "0.3.0",
   "s1ApiVersion": "3.1.15",
   "summary": "A deliberately small Lua surface for first-time Schedule I modders.",
   "types": [
@@ -42,8 +42,56 @@
       ]
     },
     {
+      "name": "ClothingOptions",
+      "summary": "Controls how a clothing item is worn and displayed.",
+      "fields": [
+        {
+          "name": "slot",
+          "type": "string",
+          "required": false,
+          "description": "feet, bottom, waist, top, outerwear, hands, neck, eyes, head, or wrist. A clone keeps its original slot when omitted."
+        },
+        {
+          "name": "application",
+          "type": "string",
+          "required": false,
+          "description": "body_layer, face_layer, or accessory. A clone keeps its original application when omitted."
+        },
+        {
+          "name": "asset",
+          "type": "string",
+          "required": false,
+          "description": "Base-game clothing asset path to use or retexture. Required when the item does not clone clothing."
+        },
+        {
+          "name": "texture",
+          "type": "string",
+          "required": false,
+          "description": "Optional PNG inside this mod folder that replaces the clothing texture."
+        },
+        {
+          "name": "colorable",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the player can choose a clothing color."
+        },
+        {
+          "name": "default_color",
+          "type": "string",
+          "required": false,
+          "description": "Default color such as white, black, red, sky_blue, navy, purple, or hot_pink."
+        },
+        {
+          "name": "blocked_slots",
+          "type": "string[]",
+          "required": false,
+          "description": "Other clothing slots blocked while this item is equipped."
+        }
+      ]
+    },
+    {
       "name": "ItemOptions",
-      "summary": "Declares an item. S1Lua registers it at the safe S1API lifecycle stage.",
+      "summary": "Describes an item and where players can buy it.",
       "fields": [
         {
           "name": "id",
@@ -73,7 +121,7 @@
           "name": "category",
           "type": "string",
           "required": false,
-          "description": "product, packaging, growing, tools, furniture, lighting, cash, consumable, equipment, ingredient, decoration, or clothing."
+          "description": "product, packaging, growing, tools, furniture, lighting, cash, consumable, equipment, ingredient, decoration, or clothing. Use the clothing table for equipable clothing settings."
         },
         {
           "name": "stack",
@@ -106,10 +154,16 @@
           "description": "PNG path inside this mod folder."
         },
         {
+          "name": "clothing",
+          "type": "ClothingOptions",
+          "required": false,
+          "description": "Equipable-clothing settings. Cloning an existing clothing item is the most reliable starting point."
+        },
+        {
           "name": "shops",
           "type": "string|string[]",
           "required": false,
-          "description": "Use compatible or a list of in-game shop names."
+          "description": "Use compatible for every suitable shop, or provide a list of shop names."
         }
       ]
     },
@@ -139,7 +193,7 @@
     },
     {
       "name": "MarkerOptions",
-      "summary": "Declares a phone-map marker at a position or following an NPC.",
+      "summary": "Describes a phone map marker at a fixed position or following an NPC.",
       "fields": [
         {
           "name": "id",
@@ -189,7 +243,7 @@
     },
     {
       "name": "PhoneCallOptions",
-      "summary": "Queues a simple staged phone call.",
+      "summary": "Describes a phone call with one or more lines of dialogue.",
       "fields": [
         {
           "name": "caller",
@@ -220,7 +274,7 @@
     },
     {
       "name": "NpcInfo",
-      "summary": "A primitive snapshot of an NPC. It contains no Unity or CLR objects.",
+      "summary": "Current details about an NPC.",
       "fields": [
         {
           "name": "id",
@@ -244,7 +298,7 @@
           "name": "relationship",
           "type": "number",
           "required": true,
-          "description": "Normalized relationship from 0 to 1."
+          "description": "Relationship from 0 for a stranger to 1 for the maximum."
         },
         {
           "name": "is_unlocked",
@@ -262,7 +316,7 @@
     },
     {
       "name": "TimeInfo",
-      "summary": "A primitive snapshot of the current game time.",
+      "summary": "The current in-game day and time.",
       "fields": [
         {
           "name": "day",
@@ -304,7 +358,7 @@
     },
     {
       "name": "WeatherInfo",
-      "summary": "A primitive snapshot of the current weather weights.",
+      "summary": "The current weather conditions.",
       "fields": [
         {
           "name": "primary",
@@ -369,8 +423,128 @@
       ]
     },
     {
+      "name": "MoneyInfo",
+      "summary": "The player\u0027s current balances.",
+      "fields": [
+        {
+          "name": "cash",
+          "type": "number",
+          "required": true,
+          "description": "Cash currently carried by the player."
+        },
+        {
+          "name": "online",
+          "type": "number",
+          "required": true,
+          "description": "Current online account balance."
+        },
+        {
+          "name": "net_worth",
+          "type": "number",
+          "required": true,
+          "description": "Current total net worth reported by the game."
+        }
+      ]
+    },
+    {
+      "name": "ProgressInfo",
+      "summary": "The player\u0027s current rank and XP.",
+      "fields": [
+        {
+          "name": "rank",
+          "type": "string",
+          "required": true,
+          "description": "Stable lowercase rank ID such as street_rat or shot_caller."
+        },
+        {
+          "name": "tier",
+          "type": "integer",
+          "required": true,
+          "description": "Current tier within the rank."
+        },
+        {
+          "name": "xp",
+          "type": "integer",
+          "required": true,
+          "description": "XP earned within the current tier."
+        },
+        {
+          "name": "total_xp",
+          "type": "integer",
+          "required": true,
+          "description": "Total XP accumulated across all ranks."
+        },
+        {
+          "name": "xp_to_next_tier",
+          "type": "number",
+          "required": true,
+          "description": "XP threshold for completing the current tier."
+        }
+      ]
+    },
+    {
+      "name": "PlayerInfo",
+      "summary": "The local player\u0027s current status and position.",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Current player name."
+        },
+        {
+          "name": "health",
+          "type": "number",
+          "required": true,
+          "description": "Current health."
+        },
+        {
+          "name": "max_health",
+          "type": "number",
+          "required": true,
+          "description": "Maximum supported health."
+        },
+        {
+          "name": "is_dead",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether the player is dead."
+        },
+        {
+          "name": "is_in_vehicle",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether the player is currently in a vehicle."
+        },
+        {
+          "name": "is_sleeping",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether the player is currently sleeping."
+        },
+        {
+          "name": "is_arrested",
+          "type": "boolean",
+          "required": true,
+          "description": "Whether the player is under arrest."
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "required": true,
+          "description": "Stable lowercase ID for the player\u0027s current region."
+        },
+        {
+          "name": "position",
+          "type": "Position",
+          "required": true,
+          "description": "Current world position with x, y, and z coordinates."
+        }
+      ]
+    },
+    {
       "name": "QuestInfo",
-      "summary": "A primitive snapshot of a known base-game quest.",
+      "summary": "Basic details about a base-game quest.",
       "fields": [
         {
           "name": "id",
@@ -393,7 +567,7 @@
       "scope": "global",
       "handler": "CreateMod",
       "signature": "s1.mod(options) -\u003E mod",
-      "summary": "Creates the single mod declared by this script.",
+      "summary": "Starts your mod and sets its identity and display information.",
       "parameters": [
         {
           "name": "options",
@@ -442,7 +616,7 @@
       "scope": "global",
       "handler": "GetTime",
       "signature": "s1.time() -\u003E TimeInfo|nil",
-      "summary": "Returns the current game-time snapshot, or nil outside a loaded game.",
+      "summary": "Returns the current in-game day and time, or nil when no save is loaded.",
       "returns": "TimeInfo|nil",
       "s1ApiUids": [
         "S1API.GameTime.TimeManager.CurrentDay",
@@ -458,10 +632,60 @@
       "scope": "global",
       "handler": "GetWeather",
       "signature": "s1.weather() -\u003E WeatherInfo|nil",
-      "summary": "Returns current weather weights, or nil before weather is available.",
+      "summary": "Returns the current weather conditions, or nil until they are available.",
       "returns": "WeatherInfo|nil",
       "s1ApiUids": [
         "S1API.Weather.WeatherManager.Current"
+      ]
+    },
+    {
+      "path": "s1.money",
+      "scope": "global",
+      "handler": "GetMoney",
+      "signature": "s1.money() -\u003E MoneyInfo",
+      "summary": "Returns current cash, online balance, and net worth. Values are zero until balance information is available.",
+      "returns": "MoneyInfo",
+      "s1ApiUids": [
+        "S1API.Money.Money.GetCashBalance",
+        "S1API.Money.Money.GetOnlineBalance",
+        "S1API.Money.Money.GetNetWorth"
+      ]
+    },
+    {
+      "path": "s1.progress",
+      "scope": "global",
+      "handler": "GetProgress",
+      "signature": "s1.progress() -\u003E ProgressInfo|nil",
+      "summary": "Returns the player\u0027s current rank and XP, or nil until this information is available.",
+      "returns": "ProgressInfo|nil",
+      "s1ApiUids": [
+        "S1API.Leveling.LevelManager.Exists",
+        "S1API.Leveling.LevelManager.Rank",
+        "S1API.Leveling.LevelManager.Tier",
+        "S1API.Leveling.LevelManager.XP",
+        "S1API.Leveling.LevelManager.TotalXP",
+        "S1API.Leveling.LevelManager.XPToNextTier"
+      ]
+    },
+    {
+      "path": "s1.player",
+      "scope": "global",
+      "handler": "GetPlayer",
+      "signature": "s1.player() -\u003E PlayerInfo|nil",
+      "summary": "Returns the local player\u0027s current status, or nil until the player has spawned.",
+      "returns": "PlayerInfo|nil",
+      "s1ApiUids": [
+        "S1API.Entities.Player.Local",
+        "S1API.Entities.Player.Name",
+        "S1API.Entities.Player.CurrentHealth",
+        "S1API.Entities.Player.MaxHealth",
+        "S1API.Entities.Player.IsDead",
+        "S1API.Entities.Player.IsInVehicle",
+        "S1API.Entities.Player.IsSleeping",
+        "S1API.Entities.Player.IsArrested",
+        "S1API.Entities.Player.CurrentRegion",
+        "S1API.Entities.Player.Position",
+        "S1API.Entities.Player.LocalPlayerSpawned"
       ]
     },
     {
@@ -469,7 +693,7 @@
       "scope": "mod",
       "handler": "DeclareItem",
       "signature": "mod:item(options)",
-      "summary": "Declares a beginner-friendly S1API item without exposing builders or Unity objects.",
+      "summary": "Creates an item and optionally adds it to shops.",
       "parameters": [
         {
           "name": "options",
@@ -479,7 +703,8 @@
         }
       ],
       "examples": [
-        "mod:item { id = \u0022golden_cuke\u0022, clone = \u0022cuke\u0022, name = \u0022Golden Cuke\u0022, price = 250, shops = \u0022compatible\u0022 }"
+        "mod:item { id = \u0022golden_cuke\u0022, clone = \u0022cuke\u0022, name = \u0022Golden Cuke\u0022, price = 250, shops = \u0022compatible\u0022 }",
+        "mod:item { id = \u0022painted_cap\u0022, clone = \u0022cap\u0022, name = \u0022Painted Cap\u0022, clothing = { texture = \u0022painted-cap.png\u0022, colorable = false } }"
       ],
       "s1ApiUids": [
         "S1API.Items.Storable.ItemCreator.CreateBuilder",
@@ -490,6 +715,18 @@
         "S1API.Items.Storable.StorableItemDefinitionBuilderBase{S1API.Items.Storable.StorableItemDefinitionBuilder}.WithLegalStatus(S1API.Items.LegalStatus)",
         "S1API.Utils.ImageUtils.LoadImage(System.String)",
         "S1API.Items.Storable.StorableItemDefinitionBuilder.Build",
+        "S1API.Items.Clothing.ClothingItemCreator.CreateBuilder",
+        "S1API.Items.Clothing.ClothingItemCreator.CloneFrom(S1API.Items.Clothing.ClothingItemDefinition)",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithSlot(S1API.Items.Clothing.ClothingSlot)",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithApplicationType(S1API.Items.Clothing.ClothingApplicationType)",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithClothingAsset(System.String)",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithColorable(System.Boolean)",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithDefaultColor(S1API.Items.Clothing.ClothingColor)",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.WithBlockedSlots(S1API.Items.Clothing.ClothingSlot[])",
+        "S1API.Items.Clothing.ClothingItemDefinitionBuilder.Build",
+        "S1API.Rendering.TextureUtils.LoadTextureFromFile(System.String,UnityEngine.FilterMode,UnityEngine.TextureWrapMode)",
+        "S1API.Rendering.AccessoryFactory.CreateAndRegisterAccessory(System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,UnityEngine.Texture2D},System.Nullable{UnityEngine.Color})",
+        "S1API.Rendering.AvatarLayerFactory.CreateAndRegisterAvatarLayer(System.String,System.String,System.String,UnityEngine.Texture2D)",
         "S1API.Items.ItemManager.GetDefinition(System.String)",
         "S1API.Shops.ShopManager.AddToCompatibleShops(S1API.Items.ItemDefinition,System.Nullable{System.Single})",
         "S1API.Shops.ShopManager.AddToShops(S1API.Items.ItemDefinition,System.String[])"
@@ -504,15 +741,15 @@
       "parameters": [
         {
           "name": "event",
-          "type": "string",
+          "type": "S1EventName",
           "required": true,
-          "description": "Event name from the list below."
+          "description": "Supported event name; your editor suggests every choice."
         },
         {
           "name": "callback",
           "type": "fun(value?: number)",
           "required": true,
-          "description": "Function to run. sleep_ended receives minutes skipped."
+          "description": "Function to run. sleep_ended provides minutes skipped; trash_recycled provides the number of objects processed."
         }
       ],
       "examples": [
@@ -520,11 +757,96 @@
       ]
     },
     {
+      "path": "mod.require",
+      "scope": "mod",
+      "handler": "RequireModule",
+      "signature": "mod:require(path) -\u003E value",
+      "summary": "Loads a helper Lua file from this mod folder.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "Relative .lua path inside this mod folder; the extension may be omitted."
+        }
+      ],
+      "returns": "any",
+      "examples": [
+        "local messages = mod:require(\u0022messages\u0022)"
+      ]
+    },
+    {
+      "path": "mod.after",
+      "scope": "mod",
+      "handler": "ScheduleAfter",
+      "signature": "mod:after(seconds, callback) -\u003E integer",
+      "summary": "Runs a function once after the chosen number of gameplay seconds.",
+      "parameters": [
+        {
+          "name": "seconds",
+          "type": "number",
+          "required": true,
+          "description": "Delay from 0.05 to 86400 seconds; paused game time does not advance it."
+        },
+        {
+          "name": "callback",
+          "type": "fun()",
+          "required": true,
+          "description": "Function to run once."
+        }
+      ],
+      "returns": "integer",
+      "examples": [
+        "mod:after(5, function() s1.log(\u0022Five seconds passed\u0022) end)"
+      ]
+    },
+    {
+      "path": "mod.every",
+      "scope": "mod",
+      "handler": "ScheduleEvery",
+      "signature": "mod:every(seconds, callback) -\u003E integer",
+      "summary": "Runs a function repeatedly at the chosen interval.",
+      "parameters": [
+        {
+          "name": "seconds",
+          "type": "number",
+          "required": true,
+          "description": "Time between runs, from 0.05 to 86400 seconds. Pauses do not count, and missed intervals are not replayed."
+        },
+        {
+          "name": "callback",
+          "type": "fun()",
+          "required": true,
+          "description": "Function to run at each interval."
+        }
+      ],
+      "returns": "integer",
+      "examples": [
+        "local timer_id = mod:every(60, function() s1.log(\u0022One minute passed\u0022) end)"
+      ]
+    },
+    {
+      "path": "mod.cancel",
+      "scope": "mod",
+      "handler": "CancelTimer",
+      "signature": "mod:cancel(timer_id) -\u003E boolean",
+      "summary": "Stops a delayed or repeating function created by this mod.",
+      "parameters": [
+        {
+          "name": "timer_id",
+          "type": "integer",
+          "required": true,
+          "description": "Timer ID returned by mod:after or mod:every."
+        }
+      ],
+      "returns": "boolean"
+    },
+    {
       "path": "mod.get",
       "scope": "mod",
       "handler": "GetState",
       "signature": "mod:get(key, default) -\u003E value",
-      "summary": "Reads a saved string, number, or boolean for this mod.",
+      "summary": "Reads a value previously saved by this mod.",
       "parameters": [
         {
           "name": "key",
@@ -550,7 +872,7 @@
       "scope": "mod",
       "handler": "SetState",
       "signature": "mod:set(key, value)",
-      "summary": "Stores a string, number, boolean, or nil in this save.",
+      "summary": "Saves a string, number, boolean, or nil in the current save file.",
       "parameters": [
         {
           "name": "key",
@@ -582,11 +904,69 @@
       ]
     },
     {
+      "path": "mod.change_cash",
+      "scope": "mod",
+      "handler": "ChangeCash",
+      "signature": "mod:change_cash(amount, visualize?, sound?)",
+      "summary": "Adds or removes carried cash after the game is loaded.",
+      "parameters": [
+        {
+          "name": "amount",
+          "type": "number",
+          "required": true,
+          "description": "Cash delta from -1000000000 to 1000000000. Positive adds cash; negative removes it."
+        },
+        {
+          "name": "visualize",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Whether the game shows the cash change on the HUD."
+        },
+        {
+          "name": "sound",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Whether the game plays its cash-change sound."
+        }
+      ],
+      "examples": [
+        "mod:on(\u0022game_loaded\u0022, function() mod:change_cash(250, true, true) end)"
+      ],
+      "s1ApiUids": [
+        "S1API.Money.Money.ChangeCashBalance(System.Single,System.Boolean,System.Boolean)"
+      ]
+    },
+    {
+      "path": "mod.add_xp",
+      "scope": "mod",
+      "handler": "AddXp",
+      "signature": "mod:add_xp(amount) -\u003E boolean",
+      "summary": "Adds XP and returns true when successful. In multiplayer, only the lobby host can add XP.",
+      "parameters": [
+        {
+          "name": "amount",
+          "type": "integer",
+          "required": true,
+          "description": "Positive whole-number XP award from 1 to 1000000."
+        }
+      ],
+      "returns": "boolean",
+      "examples": [
+        "mod:on(\u0022game_loaded\u0022, function() mod:add_xp(100) end)"
+      ],
+      "s1ApiUids": [
+        "S1API.Leveling.LevelManager.Exists",
+        "S1API.Leveling.LevelManager.AddXP(System.Int32)"
+      ]
+    },
+    {
       "path": "mod.npc",
       "scope": "mod",
       "handler": "CreateNpcProxy",
       "signature": "mod:npc(id) -\u003E Npc",
-      "summary": "Creates a reload-safe proxy for an existing NPC ID.",
+      "summary": "Finds an NPC by ID and provides functions for working with them.",
       "parameters": [
         {
           "name": "id",
@@ -605,7 +985,7 @@
       "scope": "mod",
       "handler": "DeclareMarker",
       "signature": "mod:marker(options) -\u003E string",
-      "summary": "Declares a phone-map marker created after the game loads.",
+      "summary": "Creates a phone map marker after the save finishes loading.",
       "parameters": [
         {
           "name": "options",
@@ -632,7 +1012,7 @@
       "scope": "mod",
       "handler": "QueuePhoneCall",
       "signature": "mod:call(options) -\u003E boolean",
-      "summary": "Queues a simple phone call and returns false when its NPC caller is unavailable.",
+      "summary": "Starts a simple phone call. Returns false when the chosen NPC is unavailable.",
       "parameters": [
         {
           "name": "options",
@@ -655,7 +1035,7 @@
       "scope": "mod",
       "handler": "CreateQuestProxy",
       "signature": "mod:quest(name) -\u003E Quest",
-      "summary": "Creates a read-only proxy for a known base-game quest title or compact ID.",
+      "summary": "Finds a base-game quest by title or ID so you can read its details and events.",
       "parameters": [
         {
           "name": "name",
@@ -674,7 +1054,7 @@
       "scope": "npc",
       "handler": "GetNpcInfo",
       "signature": "npc:info() -\u003E NpcInfo|nil",
-      "summary": "Returns a primitive NPC snapshot, or nil while that NPC is unavailable.",
+      "summary": "Returns the NPC\u0027s current details, or nil when that NPC is unavailable.",
       "returns": "NpcInfo|nil",
       "s1ApiUids": [
         "S1API.Entities.NPC.Get(System.String)",
@@ -718,7 +1098,7 @@
       "scope": "npc",
       "handler": "SendNpcMessage",
       "signature": "npc:text(message) -\u003E boolean",
-      "summary": "Sends a networked phone message from the NPC.",
+      "summary": "Sends the player a phone message from the NPC.",
       "parameters": [
         {
           "name": "message",
@@ -738,7 +1118,7 @@
       "scope": "npc",
       "handler": "AddNpcRelationship",
       "signature": "npc:add_relationship(amount) -\u003E boolean",
-      "summary": "Adds a networked relationship delta from -5 to 5.",
+      "summary": "Changes the NPC\u0027s relationship by an amount from -5 to 5.",
       "parameters": [
         {
           "name": "amount",
@@ -758,7 +1138,7 @@
       "scope": "npc",
       "handler": "UnlockNpc",
       "signature": "npc:unlock() -\u003E boolean",
-      "summary": "Unlocks the NPC using S1API\u0027s direct-approach default.",
+      "summary": "Unlocks the NPC as though the player met them directly.",
       "returns": "boolean",
       "s1ApiUids": [
         "S1API.Entities.NPC.Get(System.String)",
@@ -770,7 +1150,7 @@
       "scope": "npc",
       "handler": "SubscribeNpc",
       "signature": "npc:on(event, callback)",
-      "summary": "Listens for relationship_changed, unlocked, or died and rebinds after loads.",
+      "summary": "Runs a function when the NPC\u0027s relationship changes, they are unlocked, or they die.",
       "parameters": [
         {
           "name": "event",
@@ -782,7 +1162,7 @@
           "name": "callback",
           "type": "function",
           "required": true,
-          "description": "Callback; relationship_changed receives a number and unlocked receives type and notify."
+          "description": "Function to run. relationship_changed provides the new relationship; unlocked provides the unlock type and notification setting."
         }
       ],
       "s1ApiUids": [
@@ -797,7 +1177,7 @@
       "scope": "quest",
       "handler": "GetQuestInfo",
       "signature": "quest:info() -\u003E QuestInfo|nil",
-      "summary": "Returns a primitive quest snapshot, or nil before the quest is available.",
+      "summary": "Returns the quest\u0027s current details, or nil when the quest is unavailable.",
       "returns": "QuestInfo|nil",
       "s1ApiUids": [
         "S1API.Quests.QuestManager.Get\u0060\u00601",
@@ -809,7 +1189,7 @@
       "scope": "quest",
       "handler": "SubscribeQuest",
       "signature": "quest:on(event, callback)",
-      "summary": "Listens for completed or failed and rebinds after loads.",
+      "summary": "Runs a function when the quest is completed or failed.",
       "parameters": [
         {
           "name": "event",
@@ -839,22 +1219,22 @@
     },
     {
       "name": "game_loaded",
-      "summary": "The save is loaded and game objects are ready.",
+      "summary": "The save has loaded and gameplay is ready.",
       "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnLoadComplete"
     },
     {
       "name": "scene_changing",
-      "summary": "The current scene is about to change.",
+      "summary": "The game is leaving the current scene.",
       "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnPreSceneChange"
     },
     {
       "name": "before_save",
-      "summary": "The host is beginning a game save.",
+      "summary": "The game is about to save.",
       "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnSaveStart"
     },
     {
       "name": "after_save",
-      "summary": "The host finished a game save.",
+      "summary": "The game finished saving.",
       "s1ApiUid": "S1API.Lifecycle.GameLifecycle.OnSaveComplete"
     },
     {
@@ -879,13 +1259,64 @@
     },
     {
       "name": "sleep_ended",
-      "summary": "Sleep ended; the callback receives minutes skipped.",
+      "summary": "Sleep ended. The function receives the number of minutes skipped.",
+      "parameters": [
+        {
+          "name": "minutes_skipped",
+          "type": "integer",
+          "required": true,
+          "description": "Number of in-game minutes skipped while sleeping."
+        }
+      ],
       "s1ApiUid": "S1API.GameTime.TimeManager.OnSleepEnd"
     },
     {
       "name": "weather_changed",
-      "summary": "Weather became available or its weights changed.",
+      "summary": "The current weather changed.",
       "s1ApiUid": "S1API.Weather.WeatherManager.OnWeatherChanged"
+    },
+    {
+      "name": "balance_changed",
+      "summary": "Cash or online balance changed.",
+      "s1ApiUid": "S1API.Money.Money.OnBalanceChanged"
+    },
+    {
+      "name": "xp_changed",
+      "summary": "XP changed; call s1.progress() to read the new values.",
+      "s1ApiUid": "S1API.Leveling.LevelManager.OnXPChanged"
+    },
+    {
+      "name": "rank_up",
+      "summary": "The player advanced to a new tier or rank.",
+      "s1ApiUid": "S1API.Leveling.LevelManager.OnRankUp"
+    },
+    {
+      "name": "player_ready",
+      "summary": "The local player has spawned and s1.player() is ready.",
+      "s1ApiUid": "S1API.Entities.Player.LocalPlayerSpawned"
+    },
+    {
+      "name": "player_died",
+      "summary": "The local player died.",
+      "s1ApiUid": "S1API.Entities.Player.OnDeath"
+    },
+    {
+      "name": "player_revived",
+      "summary": "The local player revived.",
+      "s1ApiUid": "S1API.Entities.Player.OnRevive"
+    },
+    {
+      "name": "trash_recycled",
+      "summary": "The local player finished recycling. The function receives the number of objects processed. A filled trash bag counts as one object.",
+      "parameters": [
+        {
+          "name": "item_count",
+          "type": "integer",
+          "required": true,
+          "description": "Number of trash objects processed by the recycler."
+        }
+      ],
+      "s1ApiUid": "S1API.Utils.EventHelper.AddListener(System.Action,UnityEngine.Events.UnityEvent)"
     }
   ]
 }

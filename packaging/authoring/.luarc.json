@@ -1,0 +1,7 @@
+{
+  "runtime.version": "Lua 5.2",
+  "workspace.library": [
+    "Editor"
+  ],
+  "workspace.checkThirdParty": false
+}

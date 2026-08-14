@@ -15,6 +15,9 @@
           "toc.yml",
           "installation.md",
           "getting-started.md",
+          "editor-setup.md",
+          "recipes.md",
+          "structure.md",
           "troubleshooting.md",
           "security.md"
         ]

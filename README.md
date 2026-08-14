@@ -18,7 +18,7 @@ mod:item {
 }
 ```
 
-There are no .NET types, Unity objects, builders, registration stages, or runtime-specific APIs in that script. S1Lua translates the declaration into the correct S1API calls.
+You describe what you want in a small Lua table. S1Lua handles the game setup.
 
 ## Who this is for
 
@@ -30,9 +30,13 @@ The first surface deliberately covers a useful, teachable slice:
 - change item names, descriptions, prices, stack limits, legality, and icons;
 - add items to compatible or named shops;
 - react to a few clear game/save events;
+- read player balances, change carried cash, and react to balance changes;
+- read player rank and XP, award XP as the lobby host, and react to progression;
+- inspect local player health and status and react to death or revival;
+- react when the local player finishes recycling and award XP per trash object;
 - save small strings, numbers, and booleans per save.
 
-S1Lua does not expose arbitrary CLR or Unity objects, load .NET code, or promise hot reloading. A small surface is easier for beginners to understand and easier to keep working as S1API changes.
+S1Lua is for small scripts. It does not support custom C# code, direct Unity access, or hot reloading.
 
 ## Install a release
 
@@ -45,14 +49,14 @@ S1Lua's release archive puts the mod in `Mods` and its private runtime libraries
 
 ## Make your first mod
 
-1. Create `Mods/S1Lua/MyFirstMod` in the game folder.
-2. Copy [examples/MyFirstMod/mod.lua](examples/MyFirstMod/mod.lua) into that folder.
-3. Open `mod.lua` in any text editor and change the ID, name, and item fields.
-4. Start the game and look for `Loaded 1 S1Lua mod(s)` in the MelonLoader console.
+1. Open `Mods/S1Lua` in your code editor. Visual Studio Code will recommend the LuaLS extension.
+2. Copy `_StarterMod` to `MyFirstMod`; folders beginning with `_` are ignored by S1Lua.
+3. Open the copied `mod.lua` and change the ID, name, and item fields. The packaged LuaLS configuration provides autocomplete and early diagnostics.
+4. Restart the game and look for `Loaded 1 S1Lua mod(s)` in the MelonLoader console.
 
-The full walkthrough is in [Getting started](docs/guides/getting-started.md). The generated [API reference](docs/api/reference.md) lists every supported function and field.
+The full walkthrough is in [Getting started](docs/guides/getting-started.md). Use [Editor setup and early error checking](docs/guides/editor-setup.md) to catch mistakes before restarting, then try a complete [copyable recipe](docs/guides/recipes.md) or browse every supported function and field in the generated [API reference](docs/api/reference.md).
 
-The same guides and generated Lua reference are published as a standalone DocFX site at [ifbars.github.io/S1Lua](https://ifbars.github.io/S1Lua/). The site documents the Lua surface; it intentionally does not publish S1Lua's internal C# runtime as the modding API.
+The same guides and Lua reference are published at [ifbars.github.io/S1Lua](https://ifbars.github.io/S1Lua/). The site focuses on writing Lua mods.
 
 ## Repository layout
 

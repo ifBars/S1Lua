@@ -87,6 +87,55 @@ internal sealed class BeginnerApiBindings
         return DynValue.NewTable(table);
     }
 
+    internal DynValue GetMoney(ScriptExecutionContext context, CallbackArguments args)
+    {
+        MoneySnapshot snapshot = _host.GetMoney();
+        var table = new Table(_session.Script);
+        table.Set("cash", DynValue.NewNumber(snapshot.Cash));
+        table.Set("online", DynValue.NewNumber(snapshot.Online));
+        table.Set("net_worth", DynValue.NewNumber(snapshot.NetWorth));
+        return DynValue.NewTable(table);
+    }
+
+    internal DynValue GetProgress(ScriptExecutionContext context, CallbackArguments args)
+    {
+        ProgressSnapshot? snapshot = _host.GetProgress();
+        if (snapshot == null)
+            return DynValue.Nil;
+
+        var table = new Table(_session.Script);
+        table.Set("rank", DynValue.NewString(snapshot.Rank));
+        table.Set("tier", DynValue.NewNumber(snapshot.Tier));
+        table.Set("xp", DynValue.NewNumber(snapshot.Xp));
+        table.Set("total_xp", DynValue.NewNumber(snapshot.TotalXp));
+        table.Set("xp_to_next_tier", DynValue.NewNumber(snapshot.XpToNextTier));
+        return DynValue.NewTable(table);
+    }
+
+    internal DynValue GetPlayer(ScriptExecutionContext context, CallbackArguments args)
+    {
+        PlayerSnapshot? snapshot = _host.GetPlayer();
+        if (snapshot == null)
+            return DynValue.Nil;
+
+        var table = new Table(_session.Script);
+        table.Set("name", DynValue.NewString(snapshot.Name));
+        table.Set("health", DynValue.NewNumber(snapshot.Health));
+        table.Set("max_health", DynValue.NewNumber(snapshot.MaxHealth));
+        table.Set("is_dead", DynValue.NewBoolean(snapshot.IsDead));
+        table.Set("is_in_vehicle", DynValue.NewBoolean(snapshot.IsInVehicle));
+        table.Set("is_sleeping", DynValue.NewBoolean(snapshot.IsSleeping));
+        table.Set("is_arrested", DynValue.NewBoolean(snapshot.IsArrested));
+        table.Set("region", DynValue.NewString(snapshot.Region));
+        PositionSnapshot positionSnapshot = snapshot.Position ?? new PositionSnapshot(0, 0, 0);
+        var position = new Table(_session.Script);
+        position.Set("x", DynValue.NewNumber(positionSnapshot.X));
+        position.Set("y", DynValue.NewNumber(positionSnapshot.Y));
+        position.Set("z", DynValue.NewNumber(positionSnapshot.Z));
+        table.Set("position", DynValue.NewTable(position));
+        return DynValue.NewTable(table);
+    }
+
     internal DynValue DeclareItem(ScriptModSession session, ScriptExecutionContext context, CallbackArguments args)
     {
         ModMetadata metadata = RequireMetadata(session, ItemUsage);
@@ -108,6 +157,7 @@ internal sealed class BeginnerApiBindings
         double? resell = LuaArguments.OptionalFieldNumber(options, "resell", 0, 1, ItemUsage);
         bool? legal = LuaArguments.OptionalFieldBoolean(options, "legal", ItemUsage);
         string? icon = LuaArguments.OptionalFieldString(options, "icon", ItemUsage);
+        ClothingDeclaration? clothing = ReadClothing(options, clone, ref category);
         ShopSelection shops = ReadShops(options);
 
         session.AddItem(new ItemDeclaration(
@@ -124,6 +174,7 @@ internal sealed class BeginnerApiBindings
             resell,
             legal,
             icon,
+            clothing,
             shops));
 
         return DynValue.NewString(id);
@@ -142,6 +193,34 @@ internal sealed class BeginnerApiBindings
             throw new ScriptRuntimeException("mod:on: callback must be a function.");
         session.Subscribe(eventName, callback);
         return DynValue.Nil;
+    }
+
+    internal DynValue RequireModule(ScriptModSession session, ScriptExecutionContext context, CallbackArguments args)
+    {
+        RequireMetadata(session, "mod:require(path)");
+        int offset = LuaArguments.ModOffset(args);
+        string path = LuaArguments.RequiredString(args, offset, "mod:require(path)");
+        return session.RequireModule(path);
+    }
+
+    internal DynValue ScheduleAfter(ScriptModSession session, ScriptExecutionContext context, CallbackArguments args) =>
+        ScheduleTimer(session, args, repeat: false, "mod:after(seconds, callback)");
+
+    internal DynValue ScheduleEvery(ScriptModSession session, ScriptExecutionContext context, CallbackArguments args) =>
+        ScheduleTimer(session, args, repeat: true, "mod:every(seconds, callback)");
+
+    internal DynValue CancelTimer(ScriptModSession session, ScriptExecutionContext context, CallbackArguments args)
+    {
+        RequireMetadata(session, "mod:cancel(timer_id)");
+        int offset = LuaArguments.ModOffset(args);
+        DynValue value = LuaArguments.At(args, offset, "mod:cancel(timer_id)");
+        if (value.Type != DataType.Number || value.Number < 1 || value.Number > int.MaxValue ||
+            value.Number != Math.Truncate(value.Number))
+        {
+            throw new ScriptRuntimeException("mod:cancel: timer_id must be a positive whole number.");
+        }
+
+        return DynValue.NewBoolean(session.CancelTimer((int)value.Number));
     }
 
     internal DynValue GetState(ScriptModSession session, ScriptExecutionContext context, CallbackArguments args)
@@ -174,6 +253,53 @@ internal sealed class BeginnerApiBindings
     {
         RequireMetadata(session, "mod:save()");
         return DynValue.NewBoolean(_host.RequestSave());
+    }
+
+    internal DynValue ChangeCash(
+        ScriptModSession session,
+        ScriptExecutionContext context,
+        CallbackArguments args)
+    {
+        RequireMetadata(session, "mod:change_cash(amount, visualize, sound)");
+        int offset = LuaArguments.ModOffset(args);
+        DynValue amount = LuaArguments.At(args, offset, "mod:change_cash(amount, visualize, sound)");
+        if (amount.Type != DataType.Number || double.IsNaN(amount.Number) || double.IsInfinity(amount.Number) ||
+            amount.Number < -1_000_000_000 || amount.Number > 1_000_000_000)
+        {
+            throw new ScriptRuntimeException(
+                "mod:change_cash: amount must be a finite number from -1000000000 to 1000000000.");
+        }
+
+        bool visualize = OptionalBooleanArgument(
+            args,
+            offset + 1,
+            true,
+            "mod:change_cash(amount, visualize, sound)");
+        bool sound = OptionalBooleanArgument(
+            args,
+            offset + 2,
+            false,
+            "mod:change_cash(amount, visualize, sound)");
+        _host.ChangeCash(amount.Number, visualize, sound);
+        return DynValue.Nil;
+    }
+
+    internal DynValue AddXp(
+        ScriptModSession session,
+        ScriptExecutionContext context,
+        CallbackArguments args)
+    {
+        RequireMetadata(session, "mod:add_xp(amount)");
+        int offset = LuaArguments.ModOffset(args);
+        DynValue amount = LuaArguments.At(args, offset, "mod:add_xp(amount)");
+        if (amount.Type != DataType.Number || double.IsNaN(amount.Number) || double.IsInfinity(amount.Number) ||
+            amount.Number < 1 || amount.Number > 1_000_000 || amount.Number != Math.Truncate(amount.Number))
+        {
+            throw new ScriptRuntimeException(
+                "mod:add_xp: amount must be a whole number from 1 to 1000000.");
+        }
+
+        return DynValue.NewBoolean(_host.AddXp((int)amount.Number));
     }
 
     internal DynValue CreateNpcProxy(
@@ -465,12 +591,79 @@ internal sealed class BeginnerApiBindings
         return new ShopSelection(ShopSelectionKind.Named, names);
     }
 
+    private static ClothingDeclaration? ReadClothing(Table options, string? clone, ref string? category)
+    {
+        DynValue value = LuaArguments.Field(options, "clothing");
+        if (LuaArguments.IsNil(value))
+            return null;
+        if (value.Type != DataType.Table)
+            throw new ScriptRuntimeException($"{ItemUsage}: 'clothing' must be a table.");
+        if (category != null && !string.Equals(category, "clothing", StringComparison.OrdinalIgnoreCase))
+            throw new ScriptRuntimeException($"{ItemUsage}: 'category' must be 'clothing' when clothing options are provided.");
+
+        category = "clothing";
+        Table clothing = value.Table;
+        string? asset = LuaArguments.OptionalFieldString(clothing, "asset", ItemUsage);
+        if (clone == null && asset == null)
+            throw new ScriptRuntimeException($"{ItemUsage}: clothing without a clone must provide an 'asset' Resources path.");
+
+        return new ClothingDeclaration(
+            LuaArguments.OptionalFieldString(clothing, "slot", ItemUsage)?.ToLowerInvariant(),
+            LuaArguments.OptionalFieldString(clothing, "application", ItemUsage)?.ToLowerInvariant(),
+            asset,
+            LuaArguments.OptionalFieldString(clothing, "texture", ItemUsage),
+            LuaArguments.OptionalFieldBoolean(clothing, "colorable", ItemUsage),
+            LuaArguments.OptionalFieldString(clothing, "default_color", ItemUsage)?.ToLowerInvariant(),
+            ReadOptionalStringList(clothing, "blocked_slots", 10));
+    }
+
+    private static IReadOnlyList<string> ReadOptionalStringList(Table options, string field, int maximumCount)
+    {
+        DynValue value = LuaArguments.Field(options, field);
+        if (LuaArguments.IsNil(value))
+            return Array.Empty<string>();
+        if (value.Type != DataType.Table)
+            throw new ScriptRuntimeException($"{ItemUsage}: clothing '{field}' must be a list of strings.");
+
+        var values = new List<string>();
+        for (int index = 1; index <= value.Table.Length; index++)
+        {
+            DynValue entry = value.Table.Get(index);
+            if (entry.Type != DataType.String || string.IsNullOrWhiteSpace(entry.String))
+                throw new ScriptRuntimeException($"{ItemUsage}: every clothing '{field}' entry must be a non-empty string.");
+            values.Add(entry.String.Trim().ToLowerInvariant());
+        }
+        if (values.Count > maximumCount)
+            throw new ScriptRuntimeException($"{ItemUsage}: clothing '{field}' may contain at most {maximumCount} entries.");
+        return values;
+    }
+
     private static DynValue RequiredCallback(CallbackArguments args, int index, string usage)
     {
         DynValue callback = LuaArguments.At(args, index, usage);
         if (callback.Type is not (DataType.Function or DataType.ClrFunction))
             throw new ScriptRuntimeException($"{usage}: callback must be a function.");
         return callback;
+    }
+
+    private static DynValue ScheduleTimer(
+        ScriptModSession session,
+        CallbackArguments args,
+        bool repeat,
+        string usage)
+    {
+        RequireMetadata(session, usage);
+        int offset = LuaArguments.ModOffset(args);
+        DynValue seconds = LuaArguments.At(args, offset, usage);
+        if (seconds.Type != DataType.Number || double.IsNaN(seconds.Number) || double.IsInfinity(seconds.Number) ||
+            seconds.Number < 0.05 || seconds.Number > 86_400)
+        {
+            throw new ScriptRuntimeException($"{usage}: seconds must be a finite number from 0.05 to 86400.");
+        }
+
+        DynValue callback = RequiredCallback(args, offset + 1, usage);
+        int id = session.ScheduleTimer(seconds.Number, repeat, callback);
+        return DynValue.NewNumber(id);
     }
 
     private static double OptionalNumberArgument(
@@ -490,6 +683,20 @@ internal sealed class BeginnerApiBindings
             throw new ScriptRuntimeException($"{usage}: argument {index + 1} must be a number from {minimum} to {maximum}.");
         }
         return value.Number;
+    }
+
+    private static bool OptionalBooleanArgument(
+        CallbackArguments args,
+        int index,
+        bool defaultValue,
+        string usage)
+    {
+        if (args.Count <= index || LuaArguments.IsNil(args[index]))
+            return defaultValue;
+        DynValue value = args[index];
+        if (value.Type != DataType.Boolean)
+            throw new ScriptRuntimeException($"{usage}: argument {index + 1} must be true or false.");
+        return value.Boolean;
     }
 
     private static IReadOnlyList<string> ReadStringList(Table options, string field, string usage)

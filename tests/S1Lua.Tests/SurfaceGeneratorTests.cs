@@ -80,6 +80,66 @@ public sealed class SurfaceGeneratorTests
         Assert.Contains("---@param prefix? string", luaStub.Content, StringComparison.Ordinal);
         Assert.Contains("---@class Api", luaStub.Content, StringComparison.Ordinal);
         Assert.DoesNotContain("---@class S1Lua", luaStub.Content, StringComparison.Ordinal);
+        GeneratedArtifact reference = Assert.Single(artifacts, artifact => artifact.RelativePath == "docs/api/reference.md");
+        Assert.Contains("### Global API", reference.Content, StringComparison.Ordinal);
+        Assert.Contains("every function and option currently available", reference.Content, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GeneratesEventCompletionAndTypedCallbackOverloads()
+    {
+        var surface = new SurfaceDefinition
+        {
+            SchemaVersion = 1,
+            SurfaceVersion = "1.2.3",
+            S1ApiVersion = "3.1.12",
+            Bindings = new[]
+            {
+                new BindingDefinition
+                {
+                    Path = "mod.on",
+                    Scope = "mod",
+                    Handler = "Subscribe",
+                    Signature = "mod:on(event, callback)",
+                    Summary = "Runs a callback.",
+                    Parameters = new[]
+                    {
+                        new FieldDefinition { Name = "event", Type = "S1EventName", Required = true, Description = "Event." },
+                        new FieldDefinition { Name = "callback", Type = "fun()", Required = true, Description = "Callback." }
+                    }
+                }
+            },
+            Events = new[]
+            {
+                new EventDefinition
+                {
+                    Name = "sleep_ended",
+                    Summary = "Sleep ended.",
+                    Parameters = new[]
+                    {
+                        new FieldDefinition
+                        {
+                            Name = "minutes_skipped",
+                            Type = "integer",
+                            Required = true,
+                            Description = "Minutes skipped."
+                        }
+                    },
+                    S1ApiUid = "S1API.Sleep"
+                }
+            }
+        };
+
+        GeneratedArtifact luaStub = Assert.Single(
+            new SurfaceGenerator().Generate(surface),
+            artifact => artifact.RelativePath == "generated/s1lua.lua");
+
+        Assert.Contains("---@alias S1EventName", luaStub.Content, StringComparison.Ordinal);
+        Assert.Contains("---| '\"sleep_ended\"'", luaStub.Content, StringComparison.Ordinal);
+        Assert.Contains(
+            "---@overload fun(event: \"sleep_ended\", callback: fun(minutes_skipped: integer))",
+            luaStub.Content,
+            StringComparison.Ordinal);
     }
 
     [Fact]

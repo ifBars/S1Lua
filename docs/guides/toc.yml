@@ -2,8 +2,14 @@
   items:
     - name: Installation
       href: installation.md
-    - name: Quickstart
+    - name: Your first mod
       href: getting-started.md
+    - name: Editor setup and error checking
+      href: editor-setup.md
+    - name: Copyable recipes
+      href: recipes.md
+    - name: Structure, modules, and timing
+      href: structure.md
 - name: Help and safety
   items:
     - name: Troubleshooting

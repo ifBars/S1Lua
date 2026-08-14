@@ -97,6 +97,15 @@ public sealed class SurfaceGenerator
                 ValidateField(parameter, $"{binding.Path}({parameter.Name})", errors);
         }
 
+        foreach (EventDefinition evt in surface.Events)
+        {
+            if (string.IsNullOrWhiteSpace(evt.Name) || string.IsNullOrWhiteSpace(evt.Summary))
+                errors.Add("Every event needs a name and summary.");
+            AddDuplicates(evt.Parameters.Select(parameter => parameter.Name), $"callback parameter in {evt.Name}", errors);
+            foreach (FieldDefinition parameter in evt.Parameters)
+                ValidateField(parameter, $"{evt.Name}({parameter.Name})", errors);
+        }
+
         if (!Directory.Exists(s1ApiDirectory))
         {
             errors.Add($"S1API DocFX directory does not exist: {s1ApiDirectory}");
@@ -262,6 +271,11 @@ public sealed class SurfaceGenerator
         builder.AppendLine("-- Generated from surface/s1lua.surface.json. Do not edit by hand.");
         builder.AppendLine($"-- Surface version {surface.SurfaceVersion}; S1API {surface.S1ApiVersion}.");
         builder.AppendLine();
+        builder.AppendLine("---A supported S1Lua game event. Type a quote after mod:on( to see every choice.");
+        builder.AppendLine("---@alias S1EventName");
+        foreach (EventDefinition evt in surface.Events)
+            builder.AppendLine($"---| '\"{evt.Name}\"' # {evt.Summary}");
+        builder.AppendLine();
         foreach (SurfaceTypeDefinition type in surface.Types)
         {
             builder.AppendLine($"---{type.Summary}");
@@ -290,6 +304,14 @@ public sealed class SurfaceGenerator
         foreach (BindingDefinition binding in surface.Bindings)
         {
             builder.AppendLine($"---{binding.Summary}");
+            if (binding.Path == "mod.on")
+            {
+                foreach (EventDefinition evt in surface.Events)
+                {
+                    builder.AppendLine(
+                        $"---@overload fun(event: \"{evt.Name}\", callback: {GenerateCallbackType(evt)})");
+                }
+            }
             foreach (FieldDefinition parameter in binding.Parameters)
             {
                 string optional = parameter.Required ? string.Empty : "?";
@@ -321,37 +343,62 @@ public sealed class SurfaceGenerator
         builder.AppendLine();
         builder.AppendLine(surface.Summary);
         builder.AppendLine();
+        builder.AppendLine("This page lists every function and option currently available in S1Lua. If something is not listed here, it is not supported yet.");
+        builder.AppendLine();
         builder.AppendLine("## Functions");
         builder.AppendLine();
-        foreach (BindingDefinition binding in surface.Bindings)
+        var bindingGroups = new[]
         {
-            builder.AppendLine($"### `{binding.Signature}`");
+            (Scope: "global", Title: "Global API"),
+            (Scope: "mod", Title: "Mod API"),
+            (Scope: "npc", Title: "NPC functions"),
+            (Scope: "quest", Title: "Quest functions")
+        };
+        foreach ((string scope, string title) in bindingGroups)
+        {
+            BindingDefinition[] bindings = surface.Bindings
+                .Where(binding => binding.Scope == scope)
+                .ToArray();
+            if (bindings.Length == 0)
+                continue;
+
+            builder.AppendLine($"### {title}");
             builder.AppendLine();
-            builder.AppendLine(binding.Summary);
-            builder.AppendLine();
-            if (binding.Parameters.Count > 0)
+            foreach (BindingDefinition binding in bindings)
             {
-                builder.AppendLine("| Parameter | Type | Required | Description |");
-                builder.AppendLine("| --- | --- | --- | --- |");
-                foreach (FieldDefinition parameter in binding.Parameters)
-                    builder.AppendLine($"| `{parameter.Name}` | `{parameter.Type}` | {(parameter.Required ? "yes" : "no")} | {parameter.Description} |");
+                builder.AppendLine($"#### `{binding.Signature}`");
                 builder.AppendLine();
-            }
-            foreach (string example in binding.Examples)
-            {
-                builder.AppendLine("```lua");
-                builder.AppendLine(example);
-                builder.AppendLine("```");
+                builder.AppendLine(binding.Summary);
                 builder.AppendLine();
+                if (binding.Parameters.Count > 0)
+                {
+                    builder.AppendLine("| Parameter | Type | Required | Description |");
+                    builder.AppendLine("| --- | --- | --- | --- |");
+                    foreach (FieldDefinition parameter in binding.Parameters)
+                        builder.AppendLine($"| `{parameter.Name}` | `{parameter.Type}` | {(parameter.Required ? "yes" : "no")} | {parameter.Description} |");
+                    builder.AppendLine();
+                }
+                foreach (string example in binding.Examples)
+                {
+                    builder.AppendLine("```lua");
+                    builder.AppendLine(example);
+                    builder.AppendLine("```");
+                    builder.AppendLine();
+                }
             }
         }
 
         builder.AppendLine("## Events");
         builder.AppendLine();
-        builder.AppendLine("| Event | When it runs |");
-        builder.AppendLine("| --- | --- |");
+        builder.AppendLine("| Event | Callback values | When it runs |");
+        builder.AppendLine("| --- | --- | --- |");
         foreach (EventDefinition evt in surface.Events)
-            builder.AppendLine($"| `{evt.Name}` | {evt.Summary} |");
+        {
+            string callback = evt.Parameters.Count == 0
+                ? "none"
+                : string.Join(", ", evt.Parameters.Select(parameter => $"`{parameter.Name}: {parameter.Type}`"));
+            builder.AppendLine($"| `{evt.Name}` | {callback} | {evt.Summary} |");
+        }
         builder.AppendLine();
         builder.AppendLine("## Option tables");
         builder.AppendLine();
@@ -386,6 +433,13 @@ public sealed class SurfaceGenerator
             referencedUidFingerprint = fingerprint,
             bindings = surface.Bindings.Select(binding => binding.Path).OrderBy(path => path, StringComparer.Ordinal),
             events = surface.Events.Select(evt => evt.Name).OrderBy(name => name, StringComparer.Ordinal),
+            eventSignatures = surface.Events
+                .OrderBy(evt => evt.Name, StringComparer.Ordinal)
+                .Select(evt => new
+                {
+                    evt.Name,
+                    parameters = evt.Parameters.Select(parameter => new { parameter.Name, parameter.Type })
+                }),
             referencedUids = uids
         };
         return JsonSerializer.Serialize(snapshot, JsonOptions) + Environment.NewLine;
@@ -393,4 +447,10 @@ public sealed class SurfaceGenerator
 
     private static string EscapeCSharp(string value) =>
         value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+
+    private static string GenerateCallbackType(EventDefinition evt)
+    {
+        string parameters = string.Join(", ", evt.Parameters.Select(parameter => $"{parameter.Name}: {parameter.Type}"));
+        return $"fun({parameters})";
+    }
 }

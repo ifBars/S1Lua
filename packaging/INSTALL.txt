@@ -4,10 +4,11 @@ S1Lua installation
 1. Install MelonLoader and S1API for the same Schedule I runtime as this archive.
 2. Extract this archive into the Schedule I game folder.
 3. Start the game once and look for the S1Lua loaded message.
-4. Open Mods/S1Lua/MyFirstMod and rename mod.lua.example to mod.lua.
-5. Edit mod.lua in a text editor, then restart the game.
+4. Open Mods/S1Lua in a code editor. Visual Studio Code will recommend LuaLS.
+5. Copy _StarterMod to MyFirstMod, edit its mod.lua, then restart the game.
 
 Do not mix Mono and IL2CPP release archives.
 
-Editor/s1lua.lua is optional autocomplete metadata for Lua Language Server.
-Documentation: https://github.com/ifBars/S1Lua
+Mods/S1Lua/.luarc.json connects Lua Language Server to Mods/S1Lua/Editor/s1lua.lua automatically.
+Quickstart: https://ifbars.github.io/S1Lua/guides/getting-started.html
+Documentation: https://ifbars.github.io/S1Lua/
