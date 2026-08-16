@@ -2,7 +2,7 @@ name: sync S1API
 
 on:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '17 */4 * * *'
   repository_dispatch:
     types: [s1api_released]
   workflow_dispatch:
@@ -126,7 +126,17 @@ jobs:
           git switch -c $branch
           git add version.txt surface/s1lua.surface.json generated docs/api/reference.md src/S1Lua.Core/Generated
           git commit -m "chore: support S1API $env:S1API_VERSION"
-          git push origin $branch
+
+          $remoteRef = "refs/heads/$branch"
+          $remoteSha = git ls-remote --heads origin $remoteRef |
+            ForEach-Object { ($_ -split '\s+')[0] }
+          if ([string]::IsNullOrWhiteSpace($remoteSha)) {
+            git push origin "HEAD:$remoteRef"
+          }
+          else {
+            $lease = "--force-with-lease=$remoteRef`:$remoteSha"
+            git push $lease origin "HEAD:$remoteRef"
+          }
 
           $body = @"
           S1API released **$env:S1API_VERSION** (previously **$env:PREVIOUS_S1API_VERSION**).
