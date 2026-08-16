@@ -1,6 +1,6 @@
 {
-  "surfaceVersion": "0.3.0",
-  "s1ApiVersion": "3.1.15",
+  "surfaceVersion": "0.3.1",
+  "s1ApiVersion": "3.2.0",
   "bindingCount": 31,
   "eventCount": 18,
   "referencedUidFingerprint": "d26a251a7047f9f8fe952fb93c8812c9ea865a32df7d4c91efe07f91984db17d",
