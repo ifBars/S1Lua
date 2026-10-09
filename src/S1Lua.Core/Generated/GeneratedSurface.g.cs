@@ -6,8 +6,8 @@ namespace S1Lua.Generated;
 
 public static class S1LuaBuild
 {
-    public const string Version = "0.3.1";
-    public const string S1ApiVersion = "3.2.0";
+    public const string Version = "0.3.2";
+    public const string S1ApiVersion = "3.2.1";
 }
 
 internal static class GeneratedSurface
