@@ -1,7 +1,7 @@
 <!-- Generated from surface/s1lua.surface.json. Do not edit by hand. -->
 # S1Lua reference
 
-Surface version `0.3.1` for S1API `3.2.0`.
+Surface version `0.3.2` for S1API `3.2.1`.
 
 A deliberately small Lua surface for first-time Schedule I modders.
 
