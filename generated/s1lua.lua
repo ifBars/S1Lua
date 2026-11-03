@@ -1,6 +1,6 @@
 ---@meta
 -- Generated from surface/s1lua.surface.json. Do not edit by hand.
--- Surface version 0.3.2; S1API 3.2.1.
+-- Surface version 0.3.3; S1API 3.2.3.
 
 ---A supported S1Lua game event. Type a quote after mod:on( to see every choice.
 ---@alias S1EventName
